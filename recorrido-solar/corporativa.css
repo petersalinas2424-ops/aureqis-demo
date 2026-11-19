@@ -1,0 +1,27 @@
+:host {
+  display: block;
+  --tinta: #152019;
+  --papel: #f6f7f1;
+  --lima: #daef8a;
+  --pino: #192b20;
+  --borde: #d7dcd1;
+  --gris: #506055;
+  --margen: clamp(22px, 5.2vw, 94px);
+  font: 400 16px/1.4 Manrope, Arial, sans-serif;
+}
+.viaje-ventana { top: var(--franja, 0px); height: calc(100svh - var(--franja, 0px)); }
+#accesos-inicio { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; pointer-events: auto; }
+#accesos-inicio[hidden] { display: none; }
+#accesos-inicio a { padding-block: .65rem; }
+#accesos-inicio .boton { min-height: 42px; }
+@media(max-width:720px) {
+  #accesos-inicio { gap: .8rem; margin-top: .55rem; }
+  #accesos-inicio .boton { font-size: .82rem; min-height: 38px; padding-inline: 14px; }
+  .relato { bottom: max(121px, 15svh); }
+}
+@media(max-height:570px) and (orientation:landscape) {
+  .relato { width: 92%; padding: 0 0 42px; }
+  #accesos-inicio { margin-top: .2rem; }
+  #accesos-inicio .boton { min-height: 28px; font-size: .72rem; padding: 4px 10px; }
+  #accesos-inicio .enlace-pro { min-height: 28px; }
+}

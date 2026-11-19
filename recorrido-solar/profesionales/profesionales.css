@@ -1,0 +1,47 @@
+.intro h1 { font-size: clamp(2.65rem, 4.5vw, 4.9rem); line-height: 1.04; }
+.reunion { margin: 1.4rem .9rem 0 0; }
+.pelicula-campoy { width: min(100%, 28rem); justify-self: center; }
+.pelicula-campoy video { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; background: #17241a; border-radius: .6rem; }
+.pelicula-campoy figcaption { padding: .8rem 0 0; }
+.pelicula-campoy figcaption strong { display: block; font-size: 1.1rem; }
+.pelicula-campoy figcaption span { display: block; color: var(--muted); font-size: .9rem; }
+@media (max-width: 50rem) { .pelicula-campoy { justify-self: start; } }
+.proceso { margin: 0; padding-left: 1.8rem; }
+.proceso li { padding: 0 0 1.2rem .6rem; margin: 0 0 1.25rem; border-bottom: 1px solid #465448; }
+.proceso li:last-child { border: 0; margin-bottom: 0; padding-bottom: 0; }
+.proceso li::marker { color: var(--acid); font-variant-numeric: tabular-nums; }
+.proceso h3 { margin: 0 0 .5rem; font-size: clamp(1.25rem, 1.8vw, 1.65rem); font-weight: 600; line-height: 1.3; }
+.proceso p { color: #d2d9ce; }
+.contact-links { display: grid; justify-items: start; gap: .85rem; }
+@media (max-width: 36rem) {
+  .masthead-inner .pill { white-space: normal; font-size: .8rem; padding-inline: .9rem; text-align: center; }
+  .masthead-inner .logo { flex-shrink: 0; }
+}
+.indice-casos { display: flex; flex-wrap: wrap; gap: .4rem 1.65rem; padding: 0 0 1.6rem; }
+.indice-casos a { text-underline-offset: .24em; }
+.financiacion, .herramientas-pro { padding-block: clamp(3.5rem, 6vw, 6.5rem); }
+.financiacion-intro p, .herramientas-pro h2 + p { margin-top: 1.2rem; }
+.muestra-financiacion { background: #233c31; color: #fbfcf2; border-radius: .7rem; padding: clamp(1.2rem, 3.4vw, 2.7rem); }
+.muestra-financiacion h3 { margin: 0; font-size: clamp(1.55rem, 2.7vw, 2.2rem); line-height: 1.12; letter-spacing: -.045em; }
+.muestra-financiacion h3 + p { color: #d6dfd3; margin-top: .4rem; }
+.ficha-equipo { display: flex; flex-wrap: wrap; gap: .8rem 2.5rem; margin-block: 1.5rem; padding-block: 1rem; border-block: 1px solid #647c69; }
+.ficha-equipo dt { color: #d6dfd3; font-size: .88rem; }
+.ficha-equipo dd { font-weight: 650; }
+.plazos { margin: 0; padding: 0; border: 0; min-width: 0; }
+.plazos legend { padding: 0; margin-bottom: .65rem; }
+.selector-plazos { position: relative; display: flex; gap: .3rem; flex-wrap: wrap; }
+.selector-plazos input { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
+.selector-plazos label { display: inline-flex; align-items: center; min-height: 44px; padding: .5rem 1.05rem; border: 1px solid #a3b3a3; border-radius: 2rem; cursor: pointer; font-weight: 650; }
+.selector-plazos input:checked + label { color: #19251b; background: #daef8a; border-color: #daef8a; }
+.selector-plazos input:focus-visible + label { outline: 2px solid white; outline-offset: 3px; }
+.resultado-cuota { width: 100%; padding-block: .8rem 1.1rem; }
+.resultado-cuota p { display: none; }
+#plazo-diez:checked ~ .resultado-cuota .cuota-diez, #plazo-quince:checked ~ .resultado-cuota .cuota-quince { display: block; }
+.resultado-cuota strong { font-weight: 500; font-size: clamp(2.4rem, 5.2vw, 4.7rem); letter-spacing: -.06em; line-height: 1.2; white-space: nowrap; }
+.resultado-cuota span { display: block; color: #e3ebdb; }
+.nota-cuota { border-top: 1px solid #647c69; padding-top: .9rem; color: #d6dfd3; font-size: .88rem; }
+.herramientas-pro { background: #e8eddf; }
+.material-visita div { padding-block: 1.05rem; border-top: 1px solid var(--rule); }
+.material-visita div:first-child { border-top: 0; padding-top: 0; }
+.material-visita dt { font-size: 1.27rem; font-weight: 650; line-height: 1.35; }
+.material-visita dd { margin-top: .45rem; }

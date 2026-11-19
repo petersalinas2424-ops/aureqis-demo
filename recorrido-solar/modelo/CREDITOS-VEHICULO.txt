@@ -1,0 +1,9 @@
+Modelos de vehículos de David_Holiday, distribuidos bajo CC BY 4.0.
+Tesla Model 3
+https://sketchfab.com/3d-models/tesla-model-3-123c10f376ec4f18b93c73afc382808b
+2020 Peugeot 2008
+https://sketchfab.com/3d-models/2020-peugeot-2008-93efd164d3374295a8ac04c36e329429
+Distribución GLB: https://sceneview.github.io/credits.html
+Licencia: https://creativecommons.org/licenses/by/4.0/
+
+Adaptación para Aureqis. Mallas optimizadas para la web, materiales de carrocería ajustados, ruedas del Peugeot articuladas y conexión de recarga animada.

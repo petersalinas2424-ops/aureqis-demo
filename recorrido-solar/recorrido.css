@@ -1,0 +1,199 @@
+.viaje {
+  position: relative;
+  height: 1178vh;
+  height: 1178svh;
+  color: #fff;
+  background: #293328;
+  scroll-margin-top: 0;
+}
+.viaje-ventana {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+#viaje-foto, #viaje-foto img, #viaje-3d, .viaje-luz {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#viaje-foto img { object-fit: cover; }
+#viaje-3d { opacity: 0; transition: opacity .22s ease-out; }
+.modelo-visible #viaje-3d { opacity: 1; }
+.viaje-luz {
+  background:
+    linear-gradient(180deg, #121b19a6 0%, transparent 21%, transparent 66%, #101a15df 100%),
+    linear-gradient(90deg, #101c18c4 0%, #12201a83 21%, #19241d0b 49%, transparent 62%);
+}
+.viaje .cabecera-interior { height: clamp(66px,9svh,84px); }
+.relato {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  padding: 6vh 0 13vh;
+}
+.relato-texto { width: min(35%, 495px); }
+.relato-tipo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #f0f3e7;
+  font-size: .86rem;
+  font-weight: 600;
+  padding-bottom: clamp(12px,2.3vh,23px);
+}
+.relato-tipo svg { width: 18px; height: 18px; color: var(--lima); }
+.hora-villa { font-variant-numeric: tabular-nums; gap: 8px; }
+.hora-villa .periodo-villa { font-weight: 450; margin-left: 2px; padding-left: 10px; border-left: 1px solid #ffffff65; }
+#fase-titulo {
+  margin: 0;
+  font-weight: 485;
+  font-size: clamp(3.05rem,5vw,6.4rem);
+  line-height: 1.008;
+  letter-spacing: -.069em;
+}
+#fase-texto {
+  color: #f2f4ec;
+  margin-top: 18px;
+  width: min(100%, 31ch);
+  line-height: 1.48;
+  font-size: clamp(1rem,1.13vw,1.17rem);
+  text-wrap: pretty;
+}
+.mandos-viaje {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(2.7svh, 16px);
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  grid-template-areas: "estado acciones" "capitulos capitulos";
+  gap: 12px 30px;
+  align-items: center;
+}
+.estado-viaje {
+  grid-area: estado;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: .85rem;
+  font-weight: 600;
+}
+#viaje-posicion { font-variant-numeric: tabular-nums; font-size: .79rem; color: var(--lima); }
+.separador-estado { width: 27px; height: 1px; background: #cddab796; }
+.capitulos {
+  grid-area: capitulos;
+  display: grid;
+  grid-template-columns: repeat(11,minmax(0,1fr));
+  gap: 4px;
+}
+.capitulos button {
+  --avance: 0;
+  color: #e8eee5;
+  position: relative;
+  min-height: 40px;
+  padding: 11px 3px 0;
+  text-align: left;
+  font-size: .82rem;
+  font-weight: 500;
+}
+.capitulos button::before, .capitulos button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #ffffff60;
+}
+.capitulos button::after {
+  background: var(--lima);
+  transform: scaleX(var(--avance));
+  transform-origin: left;
+}
+.capitulos button[aria-current="step"] { color: var(--lima); font-weight: 750; }
+.capitulos button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.viaje-acciones {
+  grid-area: acciones;
+  display: flex;
+  align-items: center;
+  gap: 21px;
+}
+.viaje-acciones button,.viaje-acciones a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #f7f9f2;
+  min-height: 38px;
+  padding: 0;
+  font-size: .82rem;
+}
+.viaje-acciones svg { width: 17px; height: 17px; }
+.viaje-acciones .viaje-bajar { color: var(--lima); }
+.viaje-acciones .viaje-salir { border-bottom: 1px solid #d1d9d57d; min-height: 25px; }
+.viaje-acciones button:hover, .viaje-acciones a:hover { color: var(--lima); }
+.sin-guion { position:absolute;left:var(--margen);bottom:5vh;background:var(--tinta);padding:12px; }
+@media (max-width: 960px) and (min-width: 721px) {
+  #fase-titulo { font-size: clamp(2.6rem,5.4vw,4rem); }
+  .viaje-acciones { gap: 13px; }
+}
+@media (max-width: 720px) {
+  .viaje { height: 1064svh; }
+  .viaje .cabecera-interior { height: 66px; }
+  .viaje .menu-abierto .nav { top: 65px; }
+  .viaje-luz {
+    background: linear-gradient(180deg,#101a17bd 0%,transparent 17%,transparent 44%,#0e1b139e 60%,#0e1b14ee 82%,#0e1b14 100%);
+  }
+  .relato { inset: auto 0 max(132px,16.5svh); padding: 0; }
+  .relato-texto { width: 100%; }
+  .relato-tipo { font-size: .76rem; padding-bottom: 9px; }
+  .relato-tipo svg { width: 15px; height: 15px; }
+  #fase-titulo { font-size: clamp(2.3rem,8.5vw,3.55rem); }
+  #fase-texto { font-size: .97rem; margin-top: 10px; line-height: 1.4; max-width: 36ch; }
+  .mandos-viaje { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px; bottom: max(9px,env(safe-area-inset-bottom)); }
+  .estado-viaje { gap: 7px; height: 32px; font-size: .75rem; }
+  #viaje-posicion { font-size: .75rem; }
+  .separador-estado { width: 17px; }
+  .capitulos { flex-basis: 100%; order: 3; gap: 3px; }
+  .capitulos button { font-size: clamp(.65rem,2.7vw,.78rem); padding: 9px 0 0; min-height: 37px; }
+  .viaje-acciones { gap: 10px; }
+  .viaje-acciones .viaje-bajar { display: none; }
+  .viaje-acciones button,.viaje-acciones a { font-size: .73rem; min-height: 34px; gap: 4px; }
+  .viaje-acciones svg { width: 15px; height: 15px; }
+}
+@media (max-width: 370px) {
+  .separador-estado { display:none; }
+  .viaje-acciones .viaje-orbita { width: 30px; justify-content:center; }
+  .viaje-orbita span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  .viaje .cabecera-interior { height: 49px; }
+  .viaje .marca { width: 102px; }
+  .viaje .boton-nav,.viaje .menu-btn { min-height:32px; height:32px; }
+  .viaje .menu-abierto .nav { top:48px; }
+  .relato { inset:0; align-items:center; padding:12px 0 45px; }
+  .relato-texto { width:36%; }
+  .relato-tipo { display:none; }
+  #fase-titulo { font-size:clamp(1.8rem,5vh,2.6rem); }
+  #fase-texto { font-size:.85rem; margin-top:7px; }
+  .mandos-viaje { bottom:5px; gap:1px; }
+  .capitulos button { min-height:29px; }
+  .viaje-luz { background:linear-gradient(90deg,#0c1913bf,transparent 55%),linear-gradient(0deg,#101a15dd,transparent 35%,transparent 80%,#101a1580); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #viaje-3d { transition: none; }
+}
+
+.en-empresa .hora-villa time { display: none; }
+.en-empresa .hora-villa .periodo-villa { margin: 0; padding: 0; border: 0; font-weight: 600; }
+@media (max-width: 560px) and (orientation: portrait) {
+  .capitulos { grid-template-columns: repeat(6,minmax(0,1fr)); row-gap: 1px; }
+  .capitulos button { min-height: 31px; padding-top: 5px; font-size: .76rem; }
+  .relato { bottom: max(146px, 19svh); }
+}
