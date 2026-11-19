@@ -1,5 +1,5 @@
 import {MathUtils,Vector3} from './vendor/three.module.min.js';
-import {encuadrarViaje} from './travelling.js';
+import {encuadrarViaje} from './travelling.js?v=4123164f6cc5';
 
 const foco=new Vector3();
 const anguloInicial=Math.atan2(12.32+.55,26.4-3.05);

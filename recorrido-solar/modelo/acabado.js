@@ -1,7 +1,7 @@
 import * as T from './vendor/three.module.min.js';
-import {encuadrarViaje,encuadrarResidencial} from './travelling.js';
-import {encuadrarDron} from './dron.js';
-import {tiempoDron} from './guion.js';
+import {encuadrarViaje,encuadrarResidencial} from './travelling.js?v=4123164f6cc5';
+import {encuadrarDron} from './dron.js?v=4123164f6cc5';
+import {tiempoDron} from './guion.js?v=4123164f6cc5';
 
 // Cada toma registra la misma geometría desde una cámara conocida, en un momento del día.
 const registros = [['dia', 0], ['tejado', .34], ['pared', .705], ['noche', 1], ['patio', .677], ['costa', .803]];

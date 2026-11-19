@@ -1,9 +1,9 @@
-import {lineaCosta} from './orilla.js';
+import {lineaCosta} from './orilla.js?v=4123164f6cc5';
 import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
-import {aleatorio} from './materiales.js';
-import {crearVilla} from './villa.js';
-import {plantarPinos} from './pinar.js';
+import {aleatorio} from './materiales.js?v=4123164f6cc5';
+import {crearVilla} from './villa.js?v=4123164f6cc5';
+import {plantarPinos} from './pinar.js?v=4123164f6cc5';
 
 let AZAR;
 const EJE_Y=new T.Vector3(0,1,0);

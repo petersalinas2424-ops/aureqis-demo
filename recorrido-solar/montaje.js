@@ -1,5 +1,6 @@
-import {tiempoVilla, progresoResidencial, FIN_LLEGADA, INICIO_PLACAS_NAVE, faseCubierta, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js';
-const recurso = ruta => new URL(ruta, import.meta.url).href;
+import {tiempoVilla, progresoResidencial, FIN_LLEGADA, INICIO_PLACAS_NAVE, faseCubierta, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js?v=4123164f6cc5';
+const revision = new URL(import.meta.url).search;
+const recurso = ruta => new URL(ruta, import.meta.url).href + revision;
 
 export function iniciarPortada(raiz) {
   const controlador = new AbortController();
@@ -42,7 +43,7 @@ export function iniciarPortada(raiz) {
   };
   let promesaModulo;
   function cargarModulo() {
-    if (!promesaModulo) promesaModulo = import('./modelo/visor.js').catch(error => { promesaModulo = null; throw error; });
+    if (!promesaModulo) promesaModulo = import('./modelo/visor.js?v=4123164f6cc5').catch(error => { promesaModulo = null; throw error; });
     return promesaModulo;
   }
   const etapas = [
@@ -54,7 +55,7 @@ export function iniciarPortada(raiz) {
     {inicio:.487, punto:.555, nombre:'El punto de recarga', titulo:['El coche carga','en casa.'], texto:'Desde el punto de recarga del patio puedes programar la carga para las horas en que el coche está aparcado y hay sol.'},
     {inicio:.609, punto:.650, nombre:'La villa de noche', titulo:['La casa,','de noche.'], texto:'La batería puede alimentar las luces del salón y la terraza con la energía que se guardó durante el día.'},
     {inicio:.678, punto:.798, nombre:'La costa', titulo:['Al otro lado,','el mar.'], texto:'Desde la terraza se ven las luces de la costa. Al amanecer nos acercamos a la cubierta de una nave.'},
-    {inicio:.844, punto:.876, nombre:'La nave industrial', titulo:['La cubierta','de la nave.'], subrayado:'la nave', texto:'Fijamos los anclajes a la chapa y montamos los carriles de aluminio. Dejamos libres los lucernarios para que entre la luz.'},
+    {inicio:.844, punto:.8733, nombre:'La nave industrial', titulo:['Del carril','a la placa.'], subrayado:'carril', texto:'Sobre la chapa fijamos las grapas. Los dos carriles de aluminio bajan uno a uno y se apoyan en ellas.'},
     {inicio:INICIO_PARKING, punto:INICIO_PARKING+.052, nombre:'La pérgola solar', titulo:['Pérgola solar','para empresas.'], subrayado:'Pérgola solar', texto:'Montamos los pilares entre las plazas de aparcamiento. Las vigas que los unen sostendrán las placas.'},
     {inicio:.953+DURACION_PARKING, punto:.963+DURACION_PARKING, nombre:'Los muelles de carga', titulo:['El turno','ya ha empezado.'], texto:'Un camión entra al muelle. Al diseñar la instalación, estudiamos a qué horas funcionan las máquinas y qué potencia necesitan.'}
   ];
@@ -79,7 +80,7 @@ export function iniciarPortada(raiz) {
   let falloGrafico = false;
   let frameScroll = 0;
   let longitud = 1;
-  const recorridoExtraNave=.10;
+  const recorridoExtraNave=.20;
   const tramoCubierta=INICIO_PARKING-FIN_LLEGADA;
   const desplazamientoPara=p=>inicio+longitud*(p+recorridoExtraNave*faseCubierta(p));
   let inicio = 0;
@@ -134,9 +135,11 @@ export function iniciarPortada(raiz) {
       : nueva === 9 ? (valor > .925+DURACION_PARKING ? 'modelo/descenso-muelle'
         : 'modelo/parking-' + (tiempoParking(valor)<.4?'estructura':tiempoParking(valor)<.78?'placas':'recarga'))
       : valor >= .833 && valor < .858 ? 'modelo/llegada-nave'
-      : nueva === 8 && cubierta < .30 ? 'modelo/nave-inicio'
-      : nueva === 8 && cubierta < INICIO_PLACAS_NAVE ? 'modelo/nave-carriles'
-      : nueva === 8 && cubierta < .92 ? 'modelo/nave-paneles'
+      : nueva === 8 && cubierta < .25 ? 'modelo/nave-inicio'
+      : nueva === 8 && cubierta < .43 ? 'modelo/nave-carriles'
+      : nueva === 8 && cubierta < INICIO_PLACAS_NAVE ? 'modelo/nave-carriles-fijados'
+      : nueva === 8 && cubierta < .74 ? 'modelo/nave-paneles'
+      : nueva === 8 && cubierta < .94 ? 'modelo/nave-apertura'
       : nueva === 7 && valor >= .812 ? 'modelo/salida-villa'
       : nueva === 7 && valor < .749 ? 'modelo/costa-giro' : 'modelo/etapa-' + (nueva + 1);
     if (fotograma !== ultimoFotograma) {
@@ -190,6 +193,7 @@ export function iniciarPortada(raiz) {
   }
   window.addEventListener('load',abrirPlanoDesdeEnlace,{once:true, signal});
   window.addEventListener('hashchange',abrirPlanoDesdeEnlace,{signal});
+  if(document.readyState==='complete')requestAnimationFrame(()=>{if(!signal.aborted)abrirPlanoDesdeEnlace();});
   botonesEtapa.forEach((boton, indice) => boton.addEventListener('click', () => irAEtapa(indice)));
   botonAvance.addEventListener('click', () => irAEtapa(faseActual + 1));
 

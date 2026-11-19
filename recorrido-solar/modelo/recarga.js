@@ -1,5 +1,5 @@
-import {encuadrarResidencial} from './travelling.js';
-import {cargarVehiculo,proyectarAcabado} from './vehiculos.js';
+import {encuadrarResidencial} from './travelling.js?v=4123164f6cc5';
+import {cargarVehiculo,proyectarAcabado} from './vehiculos.js?v=4123164f6cc5';
 import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 

@@ -1,10 +1,10 @@
 import * as T from './vendor/three.module.min.js';
-import {aleatorio} from './materiales.js';
+import {aleatorio} from './materiales.js?v=4123164f6cc5';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
-import {crearManiobra} from './maniobra.js';
-import {crearPergola} from './pergola.js';
-import {plantarPinos} from './pinar.js';
-import {CORTE_MUELLES,FIN_LLEGADA,INICIO_PLACAS_NAVE,tiempoNave} from './guion.js';
+import {crearManiobra} from './maniobra.js?v=4123164f6cc5';
+import {crearPergola} from './pergola.js?v=4123164f6cc5';
+import {plantarPinos} from './pinar.js?v=4123164f6cc5';
+import {CORTE_MUELLES,FIN_LLEGADA,INICIO_PLACAS_NAVE,tiempoNave} from './guion.js?v=4123164f6cc5';
 
 const liberar = T.MathUtils.smoothstep;
 const caja = () => new T.BoxGeometry(1,1,1);
@@ -605,17 +605,39 @@ export function crearNave(render,entorno,alCargar) {
   const apoyos=[],tramos=[];
   const primerPanel=bloque=>-35.2+bloque*(9*1.52+.83);
   const centroFila=f=>-18.8+f*2.40+(f>=8?1.60:0);
+  const filaDetalle=12,bloqueDetalle=3,columnaDetalle=7;
+  const focoCarril=new T.Vector3(primerPanel(bloqueDetalle)+columnaDetalle*1.52,altoTecho(centroFila(filaDetalle))+.49,centroFila(filaDetalle));
+  const ojoDetalle=focoCarril.clone().add(new T.Vector3(3.25,2.65,4.9));
+  const mirada=new T.Vector3();
+  function encuadrarCarriles(p,aspecto){
+    camaraAerea(camara,p,aspecto);
+    const detalle=T.MathUtils.smootherstep(p,0,.19)*(1-T.MathUtils.smootherstep(p,.66,.98));
+    if(detalle===0)return 0;
+    const k=liberar(p,0,1);
+    mirada.set(T.MathUtils.lerp(-5.5,-1.2,k),T.MathUtils.lerp(10.95,5.5,k),T.MathUtils.lerp(4,7.6,k)).lerp(focoCarril,detalle);
+    camara.position.lerp(ojoDetalle,detalle);camara.lookAt(mirada);
+    camara.fov=T.MathUtils.lerp(camara.fov,aspecto<.9?65:43,detalle);
+    camara.updateProjectionMatrix();
+    const ancho=liberar(aspecto,.9,1.55);
+    camara.projectionMatrix.elements[8]-=.22*ancho;
+    camara.projectionMatrix.elements[9]-=.32*(1-ancho);
+    camara.projectionMatrixInverse.copy(camara.projectionMatrix).invert();camara.updateMatrixWorld(true);
+    return detalle;
+  }
   for(let fila=0;fila<filas;fila++)for(let bloque=0;bloque<5;bloque++){
     const x0=primerPanel(bloque)-.67,x1=primerPanel(bloque)+8*1.52+.67;
     for(const lado of [-1,1]){
       const z=centroFila(fila)+lado*.62;
       const turno=(15-fila)/15*.095+(4-bloque)/4*.081+(lado+1)*.006;
-      tramos.push({x1,z,largo:x1-x0,inicio:.072+turno});
+      const principal=fila===filaDetalle&&bloque===bloqueDetalle;
+      const inicio=principal?(lado<0?.12:.25):.43+turno*.34;
+      tramos.push({x:(x0+x1)/2,z,largo:x1-x0,inicio,fin:inicio+(principal?.17:.06)});
       const primeraJunta=Math.ceil((x0+.12+39.8)/.82);
       const ultimaJunta=Math.floor((x1-.12+39.8)/.82);
       for(let i=0;i<=5;i++){
         const junta=Math.round(T.MathUtils.lerp(primeraJunta,ultimaJunta,i/5));
-        apoyos.push({x:-39.8+junta*.82,z,inicio:turno*.3+(5-i)*.004});
+        const inicioGrapa=principal?.018: .38+turno*.24;
+        apoyos.push({x:-39.8+junta*.82,z,inicio:inicioGrapa+(5-i)*.004});
       }
     }
   }
@@ -624,37 +646,40 @@ export function crearNave(render,entorno,alCargar) {
     malla.count=0;malla.frustumCulled=false;malla.castShadow=malla.receiveShadow=true;
     malla.instanceMatrix.setUsage(T.DynamicDrawUsage);escena.add(malla);return malla;
   }
-  const carriles=loteEstructura(perfil,mat('#70818a',{metalness:.70,roughness:.38}),tramos.length);
+  const carriles=loteEstructura(perfil,mat('#475965',{metalness:.53,roughness:.37}),tramos.length);
   const grapas=loteEstructura(base,mat('#465660',{metalness:.54,roughness:.48}),apoyos.length);
+  const tornillos=loteEstructura(geo(new T.CylinderGeometry(.038,.038,.034,6)),mat('#d5d9d6',{metalness:.7,roughness:.31}),apoyos.length);
   let faseAnteriorEstructura=-1;
   function colocarEstructura(p){
-    const fase=Math.min(.45,p);
+    const fase=Math.min(INICIO_PLACAS_NAVE,p);
     if(fase===faseAnteriorEstructura)return;
     faseAnteriorEstructura=fase;
-    grapas.count=0;carriles.count=0;
+    grapas.count=0;carriles.count=0;tornillos.count=0;
     for(const apoyo of apoyos){
       const t=liberar(fase,apoyo.inicio,apoyo.inicio+.05);
       if(!t)continue;
       pivote.rotation.set(anguloCubierta(apoyo.z),0,0);
       pivote.position.set(apoyo.x,altoTecho(apoyo.z)+.147+.059*t,apoyo.z);
-      pivote.scale.set(.19,.118*t,.27);pivote.updateMatrix();grapas.setMatrixAt(grapas.count++,pivote.matrix);
+      pivote.scale.set(.19,.118*t,.42);pivote.updateMatrix();grapas.setMatrixAt(grapas.count++,pivote.matrix);
+      pivote.position.y+=.059*t+.014;pivote.position.z+=.15;
+      pivote.scale.setScalar(t);pivote.updateMatrix();tornillos.setMatrixAt(tornillos.count++,pivote.matrix);
     }
     for(const tramo of tramos){
-      const t=liberar(fase,tramo.inicio,tramo.inicio+.175);
+      const t=liberar(fase,tramo.inicio,tramo.fin);
       if(!t)continue;
-      const largo=tramo.largo*t;
-      pivote.rotation.set(anguloCubierta(tramo.z),0,0);
-      pivote.position.set(tramo.x1-largo/2,altoTecho(tramo.z)+.265,tramo.z);
-      pivote.scale.set(largo,1,1);pivote.updateMatrix();carriles.setMatrixAt(carriles.count++,pivote.matrix);
+      const vuelo=1-t;
+      pivote.rotation.set(anguloCubierta(tramo.z),0,.036*vuelo);
+      pivote.position.set(tramo.x-4.5*vuelo,altoTecho(tramo.z)+.265+1.32*vuelo,tramo.z-.22*vuelo);
+      pivote.scale.set(tramo.largo,1,1);pivote.updateMatrix();carriles.setMatrixAt(carriles.count++,pivote.matrix);
     }
-    grapas.instanceMatrix.needsUpdate=carriles.instanceMatrix.needsUpdate=true;
+    grapas.instanceMatrix.needsUpdate=carriles.instanceMatrix.needsUpdate=tornillos.instanceMatrix.needsUpdate=true;
   }
   const piezas=[];
   for(let f=0;f<filas;f++)for(let c=0;c<columnas;c++){
     const z=centroFila(f);
     const x=primerPanel(Math.floor(c/9))+(c%9)*1.52;
     // Remate escalonado por calle entre bloques para poder leer el montaje desde el aire.
-    const inicio=INICIO_PLACAS_NAVE+(f/15)*.245+(Math.floor(c/9)/4)*.103+(c%9)*.0023;
+    const inicio=INICIO_PLACAS_NAVE+Math.abs(f-filaDetalle)/12*.20+Math.abs(Math.floor(c/9)-bloqueDetalle)/3*.082+Math.abs(c%9-columnaDetalle)*.0023;
     piezas.push({x,z,y:altoTecho(z)+.438,angulo:anguloCubierta(z),inicio});
   }
   function posicionar(p){
@@ -684,15 +709,16 @@ export function crearNave(render,entorno,alCargar) {
       const descenso=T.MathUtils.clamp((p-finAereo)/(corteMuelles-finAereo),0,1);
       const fondo=fotoMuelle.image?.width?liberar(descenso,.66,.996):0;
       pergola.situar(parking);
+      let detalleCarriles=0;
       if(parking>0 && descenso<.00001) camaraParking(camara,aspecto,parking);
       else if(p<llegada) aproximarCubierta(camara,aspecto,p/llegada);
-      else if(p<=finAereo+.000001) camaraAerea(camara,montaje,aspecto);
+      else if(p<=finAereo+.000001) detalleCarriles=encuadrarCarriles(montaje,aspecto);
       else if(p<corteMuelles) descender(camara,aspecto,descenso);
       else encuadrarMuelle(camara,aspecto,tiempoManiobra,region);
       maniobra.situar(p<corteMuelles?0:tiempoManiobra);
       maniobra.mostrarEn(fondo>0?patio:escena);
       if(fondo<1){
-        acabado(montaje*finAereo,(1-.86*liberar(descenso,.15,.80))*(1-.35*liberar(parking,.015,.30)));
+        acabado(montaje*finAereo,(1-.9*detalleCarriles)*(1-.86*liberar(descenso,.15,.80))*(1-.35*liberar(parking,.015,.30)));
         cielo.visible=!!panorama.image;cielo.position.copy(camara.position);
         render.render(escena,camara);
       }else render.clear();

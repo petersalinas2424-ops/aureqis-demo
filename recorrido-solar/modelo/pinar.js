@@ -1,5 +1,5 @@
 import * as T from './vendor/three.module.min.js';
-import {aleatorio} from './materiales.js';
+import {aleatorio} from './materiales.js?v=4123164f6cc5';
 
 // Las ramas crecen desde una horquilla baja. Cada terminal lleva varias ramillas
 // orientadas en distintos planos para conservar el volumen en el vuelo del dron.

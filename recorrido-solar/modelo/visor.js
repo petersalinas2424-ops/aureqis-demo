@@ -1,17 +1,17 @@
-import {crearEnlace} from './enlace.js';
-import {crearGolondrinas} from './aves.js';
-import {tiempoParking,FIN_RECORRIDO} from './guion.js';
+import {crearEnlace} from './enlace.js?v=4123164f6cc5';
+import {crearGolondrinas} from './aves.js?v=4123164f6cc5';
+import {tiempoParking,FIN_RECORRIDO} from './guion.js?v=4123164f6cc5';
 import * as T from './vendor/three.module.min.js';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {HDRLoader} from './vendor/HDRLoader.js';
-import {crearMateriales} from './materiales.js';
-import {construirInstalacion} from './instalacion.js';
-import {encuadrarDron} from './dron.js';
-import {encuadrarResidencial} from './travelling.js';
-import {tiempoVilla,tiempoNave,tiempoDron,progresoResidencial,INICIO_EMPRESAS,DESPEGUE,FIN_ENLACE,CORTE_MUELLES,SEGUNDOS_MANIOBRA} from './guion.js';
-import {crearRecarga} from './recarga.js';
-import {crearAmbiente} from './ambiente.js';
-import {registrarAcabados} from './acabado.js';
+import {crearMateriales} from './materiales.js?v=4123164f6cc5';
+import {construirInstalacion} from './instalacion.js?v=4123164f6cc5';
+import {encuadrarDron} from './dron.js?v=4123164f6cc5';
+import {encuadrarResidencial} from './travelling.js?v=4123164f6cc5';
+import {tiempoVilla,tiempoNave,tiempoDron,progresoResidencial,INICIO_EMPRESAS,DESPEGUE,FIN_ENLACE,CORTE_MUELLES,SEGUNDOS_MANIOBRA} from './guion.js?v=4123164f6cc5';
+import {crearRecarga} from './recarga.js?v=4123164f6cc5';
+import {crearAmbiente} from './ambiente.js?v=4123164f6cc5';
+import {registrarAcabados} from './acabado.js?v=4123164f6cc5';
 
 const VISTAS={
   salon:{ojo:[2.8,1.66,2.29],foco:[-3.7,1.18,-.90]},
@@ -148,7 +148,7 @@ export function montarVisor(contenedor,{guiado=false,onCambio,onListo,onError}={
     despertar();
   }
   function prepararNave() {
-    if (!preparandoNave) preparandoNave=import('./nave.js').then(({crearNave})=>{
+    if (!preparandoNave) preparandoNave=import('./nave.js?v=4123164f6cc5').then(({crearNave})=>{
       if(cerrado)return;
       nave=crearNave(render,entorno,despertar);
       despertar();
