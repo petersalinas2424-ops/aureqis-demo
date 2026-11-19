@@ -1,4 +1,4 @@
-import {tiempoVilla, progresoResidencial, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js';
+import {tiempoVilla, progresoResidencial, FIN_LLEGADA, INICIO_PLACAS_NAVE, faseCubierta, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js';
 const recurso = ruta => new URL(ruta, import.meta.url).href;
 
 export function iniciarPortada(raiz) {
@@ -54,7 +54,7 @@ export function iniciarPortada(raiz) {
     {inicio:.487, punto:.555, nombre:'El punto de recarga', titulo:['El coche carga','en casa.'], texto:'Desde el punto de recarga del patio puedes programar la carga para las horas en que el coche está aparcado y hay sol.'},
     {inicio:.609, punto:.650, nombre:'La villa de noche', titulo:['La casa,','de noche.'], texto:'La batería puede alimentar las luces del salón y la terraza con la energía que se guardó durante el día.'},
     {inicio:.678, punto:.798, nombre:'La costa', titulo:['Al otro lado,','el mar.'], texto:'Desde la terraza se ven las luces de la costa. Al amanecer nos acercamos a la cubierta de una nave.'},
-    {inicio:.844, punto:.874, nombre:'La nave industrial', titulo:['Las placas','de la nave.'], subrayado:'la nave', texto:'Las filas de paneles ocupan la cubierta entre los lucernarios. La nave genera electricidad durante las horas de actividad.'},
+    {inicio:.844, punto:.876, nombre:'La nave industrial', titulo:['La cubierta','de la nave.'], subrayado:'la nave', texto:'Fijamos los anclajes a la chapa y montamos los carriles de aluminio. Dejamos libres los lucernarios para que entre la luz.'},
     {inicio:INICIO_PARKING, punto:INICIO_PARKING+.052, nombre:'La pérgola solar', titulo:['Pérgola solar','para empresas.'], subrayado:'Pérgola solar', texto:'Montamos los pilares entre las plazas de aparcamiento. Las vigas que los unen sostendrán las placas.'},
     {inicio:.953+DURACION_PARKING, punto:.963+DURACION_PARKING, nombre:'Los muelles de carga', titulo:['El turno','ya ha empezado.'], texto:'Un camión entra al muelle. Al diseñar la instalación, estudiamos a qué horas funcionan las máquinas y qué potencia necesitan.'}
   ];
@@ -79,6 +79,9 @@ export function iniciarPortada(raiz) {
   let falloGrafico = false;
   let frameScroll = 0;
   let longitud = 1;
+  const recorridoExtraNave=.10;
+  const tramoCubierta=INICIO_PARKING-FIN_LLEGADA;
+  const desplazamientoPara=p=>inicio+longitud*(p+recorridoExtraNave*faseCubierta(p));
   let inicio = 0;
   const cabeceras = raiz.host ? [...document.querySelectorAll('.site-header, .call-bar')] : [];
 
@@ -87,13 +90,15 @@ export function iniciarPortada(raiz) {
     if (raiz.host) raiz.host.style.setProperty('--franja', altoCabecera + 'px');
     inicio = viaje.getBoundingClientRect().top + scrollY - altoCabecera;
     // Reserva un breve tramo de lectura para la vivienda ya terminada.
-    longitud = Math.max(1, (viaje.offsetHeight - ventana.offsetHeight) * .96 / FIN_RECORRIDO);
+    longitud = Math.max(1, (viaje.offsetHeight - ventana.offsetHeight) * .96 / (FIN_RECORRIDO+recorridoExtraNave));
     solicitarFrame();
   }
 
   function dibujarRecorrido() {
     frameScroll = 0;
-    const valor = Math.max(0, Math.min(FIN_RECORRIDO,(scrollY - inicio) / longitud));
+    const distancia=(scrollY-inicio)/longitud;
+    const extra=recorridoExtraNave*limite((distancia-FIN_LLEGADA)/(tramoCubierta+recorridoExtraNave));
+    const valor=Math.max(0,Math.min(FIN_RECORRIDO,distancia-extra));
     if (valor === progresoActual && faseActual >= 0) return;
     progresoActual = valor;
     modeloMontaje?.progreso(valor);
@@ -119,14 +124,19 @@ export function iniciarPortada(raiz) {
       botonesEtapa[i].style.setProperty('--avance', String(i === nueva ? Math.max(.08, parte) : parte));
     }
     const parking = tiempoParking(valor);
-    const texto = nueva !== 9 || parking < .46 ? etapas[nueva].texto
+    const cubierta=faseCubierta(valor);
+    const texto = nueva===8 && cubierta>=INICIO_PLACAS_NAVE
+      ? 'Las placas bajan por filas y se fijan sobre dos carriles. Entre bloques queda un pasillo para el mantenimiento.'
+      : nueva !== 9 || parking < .46 ? etapas[nueva].texto
       : parking < .78 ? 'Las placas forman el techo de la pérgola. Dan sombra a los coches y producen electricidad para la nave.'
       : 'Con el cargador junto a la plaza, el coche puede aprovechar la energía solar mientras está aparcado.';
     const fotograma = nueva === 10 ? (valor < .965+DURACION_PARKING ? 'modelo/muelle-entrada' : 'modelo/etapa-10')
       : nueva === 9 ? (valor > .925+DURACION_PARKING ? 'modelo/descenso-muelle'
         : 'modelo/parking-' + (tiempoParking(valor)<.4?'estructura':tiempoParking(valor)<.78?'placas':'recarga'))
       : valor >= .833 && valor < .858 ? 'modelo/llegada-nave'
-      : nueva === 8 && valor < .887 ? 'modelo/nave-inicio'
+      : nueva === 8 && cubierta < .30 ? 'modelo/nave-inicio'
+      : nueva === 8 && cubierta < INICIO_PLACAS_NAVE ? 'modelo/nave-carriles'
+      : nueva === 8 && cubierta < .92 ? 'modelo/nave-paneles'
       : nueva === 7 && valor >= .812 ? 'modelo/salida-villa'
       : nueva === 7 && valor < .749 ? 'modelo/costa-giro' : 'modelo/etapa-' + (nueva + 1);
     if (fotograma !== ultimoFotograma) {
@@ -170,13 +180,13 @@ export function iniciarPortada(raiz) {
       (document.getElementById('servicios') || $('#soluciones')).scrollIntoView({behavior:reducido.matches ? 'instant' : 'smooth'});
       return;
     }
-    scrollTo({top:Math.ceil(inicio + longitud * etapas[i].punto), behavior:reducido.matches ? 'instant' : 'smooth'});
+    scrollTo({top:Math.ceil(desplazamientoPara(etapas[i].punto)), behavior:reducido.matches ? 'instant' : 'smooth'});
   }
   function abrirPlanoDesdeEnlace() {
-    const punto={'#muelles':etapas[10].punto,'#pergola':etapas[9].punto,'#recarga':etapas[5].punto,'#parking-recarga':INICIO_PARKING+DURACION_PARKING}[location.hash];
+    const punto={'#nave':etapas[8].punto,'#muelles':etapas[10].punto,'#pergola':etapas[9].punto,'#recarga':etapas[5].punto,'#parking-recarga':INICIO_PARKING+DURACION_PARKING}[location.hash];
     if (punto === undefined) return;
     medirRecorrido();
-    scrollTo({top:Math.ceil(inicio + longitud * punto), behavior:'instant'});
+    scrollTo({top:Math.ceil(desplazamientoPara(punto)), behavior:'instant'});
   }
   window.addEventListener('load',abrirPlanoDesdeEnlace,{once:true, signal});
   window.addEventListener('hashchange',abrirPlanoDesdeEnlace,{signal});

@@ -5,6 +5,8 @@ export const SEGUNDOS_MANIOBRA = 7.6;
 export const DESPEGUE = .798;
 export const FIN_LLEGADA = .855;
 export const INICIO_PARKING = INICIO_EMPRESAS + .465 * (1-INICIO_EMPRESAS);
+export const INICIO_PLACAS_NAVE = .49;
+export const faseCubierta = progreso => Math.min(1,Math.max(0,(progreso-FIN_LLEGADA)/(INICIO_PARKING-FIN_LLEGADA)));
 export const DURACION_PARKING = .205;
 export const FIN_RECORRIDO = 1+DURACION_PARKING;
 export const tiempoParking = p => Math.min(1,Math.max(0,(p-INICIO_PARKING)/DURACION_PARKING));

@@ -4,7 +4,7 @@ import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 import {crearManiobra} from './maniobra.js';
 import {crearPergola} from './pergola.js';
 import {plantarPinos} from './pinar.js';
-import {CORTE_MUELLES,FIN_LLEGADA,tiempoNave} from './guion.js';
+import {CORTE_MUELLES,FIN_LLEGADA,INICIO_PLACAS_NAVE,tiempoNave} from './guion.js';
 
 const liberar = T.MathUtils.smoothstep;
 const caja = () => new T.BoxGeometry(1,1,1);
@@ -592,22 +592,79 @@ export function crearNave(render,entorno,alCargar) {
   placas.castShadow=false;marcos.castShadow=true;placas.receiveShadow=marcos.receiveShadow=true;
   placas.frustumCulled=marcos.frustumCulled=false;
   for(const m of [placas,marcos]){m.instanceMatrix.setUsage(T.DynamicDrawUsage);escena.add(m);}
-  const pivote=new T.Object3D(),angulo=7*Math.PI/180;
+  const pivote=new T.Object3D();
+  const anguloCubierta=z=>Math.sign(z)*Math.atan(.041);
+  // Sección abierta de aluminio. El eje longitudinal atraviesa los nervios
+  // de la chapa y termina en cada pasillo entre bloques.
+  const seccion=new T.Shape();
+  seccion.moveTo(-.084,0);seccion.lineTo(.084,0);seccion.lineTo(.084,.12);
+  seccion.lineTo(.044,.12);seccion.lineTo(.044,.075);seccion.lineTo(-.044,.075);
+  seccion.lineTo(-.044,.12);seccion.lineTo(-.084,.12);seccion.closePath();
+  const perfil=geo(new T.ExtrudeGeometry(seccion,{depth:1,bevelEnabled:false}));
+  perfil.rotateY(Math.PI/2);perfil.translate(-.5,0,0);
+  const apoyos=[],tramos=[];
+  const primerPanel=bloque=>-35.2+bloque*(9*1.52+.83);
+  const centroFila=f=>-18.8+f*2.40+(f>=8?1.60:0);
+  for(let fila=0;fila<filas;fila++)for(let bloque=0;bloque<5;bloque++){
+    const x0=primerPanel(bloque)-.67,x1=primerPanel(bloque)+8*1.52+.67;
+    for(const lado of [-1,1]){
+      const z=centroFila(fila)+lado*.62;
+      const turno=(15-fila)/15*.095+(4-bloque)/4*.081+(lado+1)*.006;
+      tramos.push({x1,z,largo:x1-x0,inicio:.072+turno});
+      const primeraJunta=Math.ceil((x0+.12+39.8)/.82);
+      const ultimaJunta=Math.floor((x1-.12+39.8)/.82);
+      for(let i=0;i<=5;i++){
+        const junta=Math.round(T.MathUtils.lerp(primeraJunta,ultimaJunta,i/5));
+        apoyos.push({x:-39.8+junta*.82,z,inicio:turno*.3+(5-i)*.004});
+      }
+    }
+  }
+  function loteEstructura(g,material,cantidad){
+    const malla=new T.InstancedMesh(g,material,cantidad);
+    malla.count=0;malla.frustumCulled=false;malla.castShadow=malla.receiveShadow=true;
+    malla.instanceMatrix.setUsage(T.DynamicDrawUsage);escena.add(malla);return malla;
+  }
+  const carriles=loteEstructura(perfil,mat('#70818a',{metalness:.70,roughness:.38}),tramos.length);
+  const grapas=loteEstructura(base,mat('#465660',{metalness:.54,roughness:.48}),apoyos.length);
+  let faseAnteriorEstructura=-1;
+  function colocarEstructura(p){
+    const fase=Math.min(.45,p);
+    if(fase===faseAnteriorEstructura)return;
+    faseAnteriorEstructura=fase;
+    grapas.count=0;carriles.count=0;
+    for(const apoyo of apoyos){
+      const t=liberar(fase,apoyo.inicio,apoyo.inicio+.05);
+      if(!t)continue;
+      pivote.rotation.set(anguloCubierta(apoyo.z),0,0);
+      pivote.position.set(apoyo.x,altoTecho(apoyo.z)+.147+.059*t,apoyo.z);
+      pivote.scale.set(.19,.118*t,.27);pivote.updateMatrix();grapas.setMatrixAt(grapas.count++,pivote.matrix);
+    }
+    for(const tramo of tramos){
+      const t=liberar(fase,tramo.inicio,tramo.inicio+.175);
+      if(!t)continue;
+      const largo=tramo.largo*t;
+      pivote.rotation.set(anguloCubierta(tramo.z),0,0);
+      pivote.position.set(tramo.x1-largo/2,altoTecho(tramo.z)+.265,tramo.z);
+      pivote.scale.set(largo,1,1);pivote.updateMatrix();carriles.setMatrixAt(carriles.count++,pivote.matrix);
+    }
+    grapas.instanceMatrix.needsUpdate=carriles.instanceMatrix.needsUpdate=true;
+  }
   const piezas=[];
   for(let f=0;f<filas;f++)for(let c=0;c<columnas;c++){
-    const z=-18.8+f*2.40+(f>=8?1.60:0);
-    const x=-35.2+c*1.52+Math.floor(c/9)*.83;
+    const z=centroFila(f);
+    const x=primerPanel(Math.floor(c/9))+(c%9)*1.52;
     // Remate escalonado por calle entre bloques para poder leer el montaje desde el aire.
-    const inicio=.018+(f/15)*.41+(Math.floor(c/9)/4)*.17+(c%9)*.004;
-    piezas.push({x,z,y:altoTecho(z)+.265,inicio});
+    const inicio=INICIO_PLACAS_NAVE+(f/15)*.245+(Math.floor(c/9)/4)*.103+(c%9)*.0023;
+    piezas.push({x,z,y:altoTecho(z)+.438,angulo:anguloCubierta(z),inicio});
   }
   function posicionar(p){
+    colocarEstructura(p);
     let nVisibles=0;
     for(const pieza of piezas){
       if(p<=pieza.inicio)continue;
-      const t=liberar(p,pieza.inicio,pieza.inicio+.182),salto=1-t;
+      const t=liberar(p,pieza.inicio,pieza.inicio+.115),salto=1-t;
       const y=pieza.y+salto*5.2,z=pieza.z-salto*.96;
-      const giro=angulo+salto*.19;
+      const giro=pieza.angulo+salto*.19;
       pivote.position.set(pieza.x,y,z);pivote.rotation.set(giro,0,0);pivote.scale.set(1.31,.105,2.20);pivote.updateMatrix();marcos.setMatrixAt(nVisibles,pivote.matrix);
       pivote.position.y+=.058*Math.cos(giro);pivote.position.z+=.058*Math.sin(giro);
       pivote.rotation.x=giro-Math.PI*.5;pivote.scale.set(1.284,2.175,1);pivote.updateMatrix();placas.setMatrixAt(nVisibles,pivote.matrix);

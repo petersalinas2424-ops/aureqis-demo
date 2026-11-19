@@ -1,7 +1,7 @@
 .viaje {
   position: relative;
-  height: 1178vh;
-  height: 1178svh;
+  height: 1268vh;
+  height: 1268svh;
   color: #fff;
   background: #293328;
   scroll-margin-top: 0;
@@ -144,7 +144,7 @@
   .viaje-acciones { gap: 13px; }
 }
 @media (max-width: 720px) {
-  .viaje { height: 1064svh; }
+  .viaje { height: 1144svh; }
   .viaje .cabecera-interior { height: 66px; }
   .viaje .menu-abierto .nav { top: 65px; }
   .viaje-luz {
