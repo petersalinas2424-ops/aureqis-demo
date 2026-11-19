@@ -65,7 +65,7 @@ export function registrarAcabados(render, escena, edificio, cielo, cargar, patio
   const dinamicos = new Set(), materiales = new Set(), ocultar = new Set([patio]);
   edificio.traverse(obj => {
     if (!obj.isMesh) return;
-    if(obj.userData.mobiliario){
+    if(obj.userData.mobiliario || obj.userData.paisajismo){
       ocultar.add(obj);
     } else if (obj.instanceMatrix?.usage === T.DynamicDrawUsage) {
       dinamicos.add(obj.material);

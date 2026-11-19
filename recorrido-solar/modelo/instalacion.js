@@ -3,6 +3,7 @@ import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 import {aleatorio} from './materiales.js';
 import {crearVilla} from './villa.js';
+import {plantarPinos} from './pinar.js';
 
 let AZAR;
 const EJE_Y=new T.Vector3(0,1,0);
@@ -251,8 +252,10 @@ function olivar(padre,m) {
   };
   const arbol=(x,z,s)=>{
     const base=new T.Vector3(x,.01,z);
-    const arranque=base.clone().add(new T.Vector3(.16*s,1.05*s,.06*s));
-    agregarRama(base,arranque,.155*s);
+    const giro=AZAR()*Math.PI*2;
+    const pie=base.clone().add(new T.Vector3(-Math.sin(giro)*s*.12,.46*s,Math.cos(giro)*s*.12));
+    const arranque=pie.clone().add(new T.Vector3(Math.cos(giro)*s*.23,.54*s,Math.sin(giro)*s*.23));
+    agregarRama(base,pie,.195*s);agregarRama(pie,arranque,.15*s);
     for(let i=0;i<7;i++){
       const ang=i*.898+AZAR()*.4, rad=(.55+AZAR()*.51)*s;
       const bif=arranque.clone().add(new T.Vector3(Math.cos(ang)*rad,.55*s+AZAR()*.3*s,Math.sin(ang)*rad));
@@ -269,7 +272,7 @@ function olivar(padre,m) {
       }
     }
   };
-  for(const [x,z,s] of [[-10.58,3.5,1.67],[-15.7,-4.8,2.0],[13.1,-6.4,1.84],[-16.5,9.1,1.05],[-14,-14,1.8],[21,-11.5,2.35],[-20,-2,1.60],[1,-16,1.93],[11.5,-21,1.68],[-6,-22,1.82],[-25,17,1.60]]) arbol(x,z,s);
+  for(const [x,z,s] of [[-10.58,3.5,1.52],[13.1,-6.4,1.68],[-16.5,9.1,1.05],[-14,-14,1.70],[-20,-2,1.60],[1,-16,1.43],[11.5,-21,1.68],[-25,17,1.35]]) arbol(x,z,s);
   function instanciar(g,mat,formas){
     const obj=new T.InstancedMesh(g,mat,formas.length);
     formas.forEach((matrix,index)=>obj.setMatrixAt(index,matrix));
@@ -334,6 +337,29 @@ function paisaje(padre,m){
   }
   geo.setAttribute('color',new T.Float32BufferAttribute(rgb,3));geo.computeVertexNormals();
   const terreno=malla(padre,geo,m.lomas);terreno.castShadow=false;terreno.receiveShadow=false;
+  const pinos=[[-17,-7,7.3,3.85],[-22,-10,5.4,2.7],[20,-13,7.9,4.0],[-5,-25,6.9,3.7],
+    [26,-24,5.7,2.9],[-32,9,6.2,3.4],[-35,4,4.8,2.3],[6,-39,5.5,3.0]];
+  plantarPinos(padre,pinos.map(([x,z,h,r])=>[x,elevacion(x,z),z,h,r]),m.corteza,m.aciculas,8527);
+  // Bancales de piedra seca a media ladera, siguiendo la pendiente por detrás de la villa.
+  const mampuestos=[], coloresPiedra=[], cantero=aleatorio(519), bloque=new T.Object3D();
+  for(const [inicio,fin,zBase] of [[-41,5,-18.8],[-29,30,-29.7],[4,38,-35]]) {
+    for(let hilada=0;hilada<3;hilada++){
+      let x=inicio+hilada*.23;
+      while(x<fin){
+        const largo=.55+cantero()*.81;
+        const z=zBase+1.7*Math.sin(x*.091)+hilada*.095;
+        bloque.position.set(x+largo*.5,elevacion(x,z)+.10+hilada*.236,z);
+        bloque.rotation.set((cantero()-.5)*.18,-.15*Math.cos(x*.091),(cantero()-.5)*.13);
+        bloque.scale.set(largo*.63,.19+cantero()*.055,.34+cantero()*.09);
+        bloque.updateMatrix();mampuestos.push(bloque.matrix.clone());
+        coloresPiedra.push(new T.Color().setHSL(.092+cantero()*.025,.13+cantero()*.10,.60+cantero()*.24));
+        x+=largo*.94;
+      }
+    }
+  }
+  const bancales=new T.InstancedMesh(new T.DodecahedronGeometry(1),m.caliza,mampuestos.length);
+  mampuestos.forEach((matriz,i)=>{bancales.setMatrixAt(i,matriz);bancales.setColorAt(i,coloresPiedra[i]);});
+  bancales.castShadow=true;bancales.receiveShadow=true;bancales.userData.paisajismo=true;padre.add(bancales);
   const obj=new T.Object3D(),matorral=new T.InstancedMesh(new T.PlaneGeometry(1,1),m.monte,1100);
   const rng=aleatorio(468);
   const piedras=new T.InstancedMesh(new T.IcosahedronGeometry(1,1),m.caliza,220);

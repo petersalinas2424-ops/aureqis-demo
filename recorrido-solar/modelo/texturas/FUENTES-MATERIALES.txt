@@ -4,6 +4,8 @@ Terreno de la parcela y de los parterres: https://polyhaven.com/a/dry_ground_roc
 Vegetación de las lomas: https://polyhaven.com/a/aerial_grass_rock
 Atlas de hojas y ramas: https://polyhaven.com/a/shrub_02
 
+La textura pino-rama.webp se generó para este recorrido. Las copas combinan la ramilla de pino piñonero con troncos y horquillas modelados en tres dimensiones.
+
 Los cuatro mapas villa-dia, villa-tejado, villa-pared y villa-noche son estudios de materiales generados a partir de cuatro encuadres de esta villa. Se pidió conservar la cámara, las aristas y la posición de los objetos. En las vistas generales se trabajaron el travertino, el roble, el jardín mediterráneo y el aspecto de las habitaciones de mañana y a las 22:30. Los dos acercamientos corresponden a la cubierta vacía a mediodía y a la pared técnica vacía por la tarde. El navegador monta los equipos en tres dimensiones e ilumina la villa y el agua durante el recorrido.
 
 Para el punto de recarga se generó un acabado de pintura y cristales a partir del plano del coche ya conectado. La toma respeta la posición de las ruedas y la carrocería. El cable, el conector y el indicador se dibujan en el modelo.

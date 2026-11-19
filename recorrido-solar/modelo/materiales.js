@@ -96,6 +96,7 @@ export function crearMateriales(cargar, anisotropia) {
     led:new T.MeshBasicMaterial({color:'#92c578'}), cable:mate('#35362f'),
     corteza:mate('#b4a58a',{map:mapa('corteza',1,1.3),roughness:1}),
     hojas:new T.MeshStandardMaterial({map:mapa('olivo-rama'),alphaTest:.38,side:T.DoubleSide,color:'#b5c5a3',roughness:1}),
+    aciculas:mate('#e4ebd9',{map:mapa('pino-rama'),alphaTest:.31,side:T.DoubleSide}),
     herbazal:mate('#ffffff',{vertexColors:true,side:T.DoubleSide}), caliza:mate('#92816a',{roughness:1}),
     pantalla:new T.MeshBasicMaterial({color:'#4a725d'})
   };

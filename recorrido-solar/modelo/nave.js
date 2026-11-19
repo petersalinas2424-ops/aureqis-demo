@@ -3,6 +3,7 @@ import {aleatorio} from './materiales.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 import {crearManiobra} from './maniobra.js';
 import {crearPergola} from './pergola.js';
+import {plantarPinos} from './pinar.js';
 import {CORTE_MUELLES,FIN_LLEGADA,tiempoNave} from './guion.js';
 
 const liberar = T.MathUtils.smoothstep;
@@ -323,7 +324,9 @@ export function crearNave(render,entorno,alCargar) {
     for(let i=0;i<8;i++)box(linea,x+2.62,.137,26.5+i*2.23,.07,.01,.96);
   }
   for(let x=-56;x<60;x+=9)box(linea,x,.091,52.5,3.7,.015,.13);
-  for(let x=-60;x<68;x+=3.2)box(hormigon,x,.21,57.7,3.14,.28,.35);
+  for(let x=-60;x<68;x+=3.2){
+    if(Math.abs(x+48)>7 && Math.abs(x-47)>7)box(hormigon,x,.21,57.7,3.14,.28,.35);
+  }
   for(let z=-42;z<52;z+=8)box(linea,53.3,.088,z,.13,.01,3.1);
   // Fachada modular y una cubierta a dos pendientes con juntas alzadas.
   box(hormigon,0,1.08,0,ancho,2.1,fondo);
@@ -393,6 +396,8 @@ export function crearNave(render,entorno,alCargar) {
   for(let i=0;i<160;i++){
     const x=azar()*440-220,z=azar()*290-190;
     if(Math.abs(x)<79&&z>-57&&z<68)continue;
+    if(Math.abs(z+60)<7 || Math.abs(x-85)<7 || Math.abs(z-65)<7 || Math.abs(x+90)<7)continue;
+    if([[-142,-76,46,30],[18,-100,69,38],[86,-92,48,33],[-91,124,58,29]].some(([cx,cz,w,d])=>Math.abs(x-cx)<w/2+7 && Math.abs(z-cz)<d/2+12))continue;
     const tam=1.9+azar()*1.8;cilindro(corteza,x,tam*.39,z,tam*.062,tam*.82);
     for(let j=0;j<4;j++)b.poner(plano,hojas,x,tam*1.04,z,tam*1.7,tam*1.29,1,0,j*Math.PI*.25+azar()*.25);
   }
@@ -409,6 +414,129 @@ export function crearNave(render,entorno,alCargar) {
   }
   b.terminar();
   const acabado=acabadoIndustrial(mats,textura,camara);
+  // Relieve lejano de la vega. Nace bajo el terreno llano del polígono;
+  // los perfiles de las lomas se recortan a distintas distancias en la bruma.
+  const relieve=geo(new T.PlaneGeometry(1040,880,112,88));
+  relieve.rotateX(-Math.PI/2);
+  const vertices=relieve.attributes.position,tonos=[];
+  const colorLoma=new T.Color(),pastoSeco=new T.Color('#e2c992'),monteBajo=new T.Color('#879374');
+  for(let i=0;i<vertices.count;i++){
+    const x=vertices.getX(i),z=vertices.getZ(i),distancia=Math.hypot(x,z);
+    const ondulacion=.50+.24*Math.sin(x*.019+z*.012)+.16*Math.sin(z*.041-x*.007)+.09*Math.cos(x*.054+z*.027);
+    const desnivel=liberar(distancia,172,340)*(10+48*ondulacion);
+    vertices.setY(i,desnivel-.39);
+    colorLoma.copy(pastoSeco).lerp(monteBajo,ondulacion);
+    tonos.push(colorLoma.r,colorLoma.g,colorLoma.b);
+  }
+  relieve.setAttribute('color',new T.Float32BufferAttribute(tonos,3));relieve.computeVertexNormals();
+  const cerros=new T.Mesh(relieve,mat('#e1d8c6',{map:textura('pastizal',29,25),vertexColors:true,roughness:1}));
+  escena.add(cerros);
+  const zinc=mat('#76817d',{metalness:.47,roughness:.55});
+  const bordillo=mat('#bdbab0'), pavimento=mat('#b1aba0',{roughness:.98});
+  const pintura=mat('#ece7d7'), madera=mat('#986e47'), envoltura=mat('#c2c6b8');
+  const tierraVegetal=mat('#675848'), ramaje=mat('#817566');
+  const aciculas=mat('#d7e4ce',{map:textura('pino-rama'),alphaTest:.31,side:T.DoubleSide});
+  // El vial de servicio conecta las parcelas traseras y dobla junto al almacén.
+  box(asfalto,-27,-.03,-60,235,.12,8.3);
+  box(asfalto,-90,-.033,1.8,8.1,.12,126);
+  for(let x=-141;x<82;x+=10)box(pintura,x,.04,-60,3.25,.014,.13);
+  for(let z=-51;z<62;z+=10)box(pintura,-90,.04,z,.13,.014,3.25);
+  for(const [x,z,d] of [[-142,-76,30],[18,-100,38],[86,-92,33]]) {
+    const borde=z+d/2, largo=-60-borde;
+    if(largo>0)box(asfalto,x,.002,borde+largo/2,8.2,.10,largo);
+  }
+  // Depósitos y tubería de la parcela vecina. Las patas dejan ver el fondo
+  // por debajo del cuerpo de acero al aproximarse a la primera cubierta.
+  const aceroSatinado=mat('#d0d3ca',{metalness:.62,roughness:.46});
+  const cono=geo(new T.ConeGeometry(1,1,28)), deposito=geo(new T.CylinderGeometry(1,1,1,28));
+  for(const x of [-32,-25.6,-19.2]){
+    const z=-94;
+    for(const dx of [-1.32,1.32])for(const dz of [-1.32,1.32])
+      box(zinc,x+dx,1.82,z+dz,.19,3.64,.19);
+    b.poner(deposito,aceroSatinado,x,7.95,z,2.42,8.5,2.42);
+    b.poner(cono,aceroSatinado,x,2.72,z,2.42,2.06,2.42,Math.PI);
+    b.poner(cono,aceroSatinado,x,12.64,z,2.47,.93,2.47);
+    for(const y of [3.82,5.90,8.05,10.2,12.17])
+      b.poner(deposito,zinc,x,y,z,2.46,.095,2.46);
+  }
+  box(zinc,-18.2,10.62,-96.55,30,.20,.26);
+  // Hileras de cultivo en los claros de la vega que se ven entre las cubiertas.
+  const surco=mat('#8c7757',{roughness:1});
+  for(let i=0;i<9;i++){
+    const x=-69+i*4.6;
+    box(surco,x,-.065,-138,.92,.1,48);
+    for(let j=0;j<11;j++){
+      const z=-160+j*4.4, h=2.1+.66*azar();
+      cilindro(ramaje,x,h*.27,z,.12,h*.59);
+      for(let k=0;k<4;k++)
+        b.poner(plano,hojas,x+Math.cos(k)*.28,h*.87,z+Math.sin(k)*.28,h*1.24,h*.98,1,-.15,k*.79+.18*i);
+    }
+  }
+  const pinos=[[-71,-39,6,3.3],[-74,-32,7.5,4.2],[-72,-18,6.2,3.2],
+    [-64,55,5.8,3],[-56,57,4.4,2.5],[61,55,5.8,3.1],[67,52,6.5,3.4],
+    [65,0,5.7,2.9],[67,-9,6.8,3.5],[68,-22,5.4,3],[-37,-51,6.9,3.9],
+    [-24,-50,5.8,3.5],[-9,-51,6.3,3.1],[40,-51,6.4,3.5]];
+  for(const g of plantarPinos(escena,pinos.map(([x,z,h,r])=>[x,.08,z,h,r]),ramaje,aciculas,3028))geos.add(g);
+  // Cerramiento de malla desplegada galvanizada, con huecos en ambos accesos.
+  const trama=registrar(lienzo(64,64,ctx=>{
+    ctx.strokeStyle='#a9b0a9';ctx.lineWidth=3.3;
+    for(let n=-64;n<=64;n+=32){
+      ctx.beginPath();ctx.moveTo(n,0);ctx.lineTo(n+64,64);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(n,64);ctx.lineTo(n+64,0);ctx.stroke();
+    }
+  }));
+  trama.repeat.set(6,3);
+  const mallaMetal=mat('#b0b7b2',{map:trama,alphaTest:.29,side:T.DoubleSide,metalness:.42});
+  for(const [inicio,fin] of [[-72,-54],[-42,40],[54,72]]) {
+    const tramos=Math.ceil((fin-inicio)/3.2),paso=(fin-inicio)/tramos;
+    for(let i=0;i<=tramos;i++){
+      const x=inicio+i*paso;
+      box(zinc,x,1.03,58.85,.066,1.73,.066);
+      if(i<tramos)b.poner(plano,mallaMetal,x+paso/2,1.03,58.85,paso,1.55,1);
+    }
+    box(zinc,(inicio+fin)/2,1.84,58.85,fin-inicio,.055,.055);
+  }
+  // Aceras y acceso a oficinas. Las jardineras enmarcan la puerta acristalada.
+  box(bordillo,25,.20,30.14,24,.30,4.1);
+  box(pavimento,25,.365,30.14,23.88,.045,3.96);
+  for(const x of [15.2,28.4,33.7]){
+    box(bordillo,x,.58,31.0,3.45,.48,.95);
+    box(tierraVegetal,x,.835,31,3.23,.035,.77);
+    for(let i=0;i<19;i++){
+      const xx=x+(azar()-.5)*3.13,zz=31+(azar()-.5)*.52;
+      const tam=.48+.30*azar();
+      for(let cara=0;cara<2;cara++)b.poner(plano,hojas,xx,.86+tam*.35,zz,tam,tam,1,-.12,azar()*.7+cara*1.57,.2);
+    }
+  }
+  // Dos olivos jóvenes dan escala a las oficinas a través de las vigas de la pérgola.
+  for(const [x,h] of [[15.2,2.95],[28.4,2.47]]){
+    cilindro(ramaje,x,.8+h*.28,31,.076,h*.56);
+    for(let k=0;k<6;k++){
+      const ang=k*2.4,xr=x+Math.cos(ang)*.35,zr=31+Math.sin(ang)*.35;
+      b.poner(tubo,ramaje,(x+xr)/2,.78+h*.63,(31+zr)/2,.041,h*.34,.041,.35*Math.sin(ang),0,-.35*Math.cos(ang));
+      for(let j=0;j<6;j++)
+        b.poner(plano,hojas,xr+(azar()-.5)*.43,.74+h*(.78+azar()*.16),zr+(azar()-.5)*.45,1.16,1.03,1,-.30,azar()*6.28,.18);
+    }
+  }
+  for(let i=0;i<6;i++)box(pintura,39.25,.096,30.05+i*.70,3.05,.014,.35);
+  for(const x of [19.3,23.5]){
+    cilindro(zinc,x,.78,31.6,.075,.82);
+    cilindro(pintura,x,1.04,31.6,.077,.09);
+  }
+  const directorio=mat('#ffffff',{map:registrar(cartel('OFICINAS','#314540','#f1eee4',384,96))});
+  b.poner(plano,directorio,21.35,3.48,29.85,3.72,.69,1);
+  box(zinc,21.35,3.48,29.79,3.79,.74,.095);
+  // Palés y bultos flejados en el lateral de servicio, fuera del giro de los camiones.
+  for(const [x,z,h] of [[-44,3,.95],[-46,3,1.12],[-44,5.4,.77],[-46,5.4,.98],[-45,-3,1.06],[-43,-5,.85]]){
+    for(const dz of [-.43,0,.43])box(madera,x,.19,z+dz,1.45,.21,.16);
+    for(let k=0;k<6;k++)box(madera,x-.61+k*.244,.32,z,.215,.08,1.14);
+    box(envoltura,x,.37+h/2,z,1.38,h,1.08);
+    for(const dx of [-.40,.40]){
+      box(zinc,x+dx,.378+h,z,.026,.014,1.10);
+      box(zinc,x+dx,.37+h/2,z+.546,.026,h,.013);
+    }
+  }
+  b.terminar();
   const patio=new T.Scene(),region=new T.Vector4();
   patio.environment=entorno;patio.environmentIntensity=escena.environmentIntensity;
   patio.environmentRotation.copy(escena.environmentRotation);

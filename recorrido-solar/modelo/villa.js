@@ -387,10 +387,10 @@ export function crearVilla(padre,m) {
   }
   for(let i=0;i<9;i++)macizo(-8.97+i*.78,11.04+rng()*.3,.26);
   // Una pradera ajardinada enlaza los bordes de piedra con el terreno de la ladera.
-  const pradera=definir('cespedVilla',acabado('#77905b',{map:m.lomas.map,transparent:true,vertexColors:true,depthWrite:false}),.12);
+  const pradera=definir('cespedVilla',acabado('#d9e0b1',{map:m.lomas.map,transparent:true,vertexColors:true,depthWrite:false}),.12);
   pradera.onBeforeCompile=sh=>{
     sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',
-      '#ifdef USE_MAP\nvec3 pasto=texture2D(map,vMapUv).rgb;diffuseColor.rgb*=clamp(.68+dot(pasto,vec3(.33))*1.05,.69,1.26);\n#endif');
+      '#ifdef USE_MAP\nvec3 pasto=texture2D(map,vMapUv*.43).rgb;diffuseColor.rgb*=pasto*.93+sqrt(pasto)*.28;\n#endif');
   };
   const geoPrado=new T.PlaneGeometry(47,42,51,43);geoPrado.rotateX(-Math.PI/2);
   const vert=geoPrado.attributes.position, rgb=[];
@@ -399,10 +399,10 @@ export function crearVilla(padre,m) {
     const borde=rr+.034*Math.sin(x*.34+z*.14)+.045*Math.cos(z*.37-x*.12);
     vert.setY(i,-.118+.020*Math.sin(z*.41)*Math.sin(x*.48));
     const tono=.92+.040*Math.sin(x*.68+z*.22)+.035*Math.cos(z*.76);
-    rgb.push(tono,tono+.024,tono-.015,1-T.MathUtils.smoothstep(borde,.84,1.12));
+    rgb.push(tono,tono+.024,tono-.015,1-T.MathUtils.smoothstep(borde,.46,.90));
   }
   geoPrado.setAttribute('color',new T.Float32BufferAttribute(rgb,4));
-  const cesped=new T.Mesh(geoPrado,pradera);cesped.position.z=2;cesped.receiveShadow=true;cesped.renderOrder=-2;padre.add(cesped);
+  const cesped=new T.Mesh(geoPrado,pradera);cesped.position.z=2;cesped.receiveShadow=true;cesped.renderOrder=-2;cesped.userData.paisajismo=true;padre.add(cesped);
   const grava=definir('gravaJardin',acabado('#e0cfb3',{map:m.suelo.map,roughness:.99}));
   grava.onBeforeCompile=sh=>{
     sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',
