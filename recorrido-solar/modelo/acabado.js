@@ -1,7 +1,7 @@
 import * as T from './vendor/three.module.min.js';
-import {encuadrarViaje,encuadrarResidencial} from './travelling.js?v=d3fe41877940';
-import {encuadrarDron} from './dron.js?v=d3fe41877940';
-import {tiempoDron} from './guion.js?v=d3fe41877940';
+import {encuadrarViaje,encuadrarResidencial} from './travelling.js?v=53302cb81952';
+import {encuadrarDron} from './dron.js?v=53302cb81952';
+import {tiempoDron} from './guion.js?v=53302cb81952';
 
 // Cada toma registra la misma geometría desde una cámara conocida, en un momento del día.
 const registros = [['dia', 0], ['tejado', .34], ['pared', .705], ['noche', 1], ['patio', .677], ['costa', .803]];
@@ -10,7 +10,7 @@ const situar = 'clipA=tomaA*puntoVilla;clipB=tomaB*puntoVilla;lugarVilla=puntoVi
 const fragmentos = `
   uniform sampler2D colorA,colorB,fondoA,fondoB;
   uniform vec2 intensidades;
-  uniform float tomaNocturna,registroCosta;
+  uniform float tomaNocturna,registroCosta,registroPatio;
   uniform vec3 ojoA,ojoB;
   varying vec4 clipA,clipB; varying vec3 lugarVilla;
   // El vehículo se dibuja en 3D. Evita proyectar su antigua silueta sobre la
@@ -48,6 +48,11 @@ const aplicar = `
     vec4 da=detalleVilla(colorA,fondoA,clipA);
     vec4 db=detalleVilla(colorB,fondoB,clipB);
     vec2 pesos=vec2(da.a*fondoSinEquipo(ojoA),db.a*fondoSinEquipo(ojoB))*intensidades;
+    // En el plano del coche el pinar y el terreno tienen volumen propio.
+    // La fotografía aporta el acabado de la fachada, hasta su encuentro con el jardín.
+    float fachadaPatio=(1.-smoothstep(8.5,10.5,lugarVilla.x))*smoothstep(-5.,-3.6,lugarVilla.z);
+    float sueloCercano=smoothstep(2.0,3.4,lugarVilla.z)*(1.-smoothstep(.08,.32,lugarVilla.y));
+    pesos.y*=mix(1.,max(fachadaPatio,sueloCercano),registroPatio);
     // En la pared de equipos la iluminación física conserva una sola sombra al rodear el patio.
     float pared=smoothstep(7.86,7.99,lugarVilla.x)*(1.-smoothstep(8.30,8.55,lugarVilla.x));
     float bajoAlero=1.-smoothstep(2.87,3.36,lugarVilla.y);
@@ -100,13 +105,13 @@ export function registrarAcabados(render, escena, edificio, cielo, cargar, patio
   });
   const u = {
     tomaA:{},tomaB:{},colorA:{},colorB:{},fondoA:{},fondoB:{},ojoA:{},ojoB:{},
-    intensidades:{value:new T.Vector2()},tomaNocturna:{value:0},registroCosta:{value:0}
+    intensidades:{value:new T.Vector2()},registroPatio:{value:0},tomaNocturna:{value:0},registroCosta:{value:0}
   };
   let listo=false, tramo=-1;
   function asociar(inicio){
     if(inicio===tramo) return;
     tramo=inicio;
-    u.tomaNocturna.value=inicio===2?1:0;u.registroCosta.value=inicio===4?1:0;
+    u.registroPatio.value=inicio===3?1:0;u.tomaNocturna.value=inicio===2?1:0;u.registroCosta.value=inicio===4?1:0;
     for(const [i,letra] of [[inicio,'A'],[inicio+1,'B']]){
       const toma=tomas[i];u['toma'+letra].value=toma.pv;
       u['ojo'+letra].value=toma.camara.position;

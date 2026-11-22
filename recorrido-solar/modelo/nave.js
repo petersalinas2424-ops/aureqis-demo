@@ -1,10 +1,10 @@
 import * as T from './vendor/three.module.min.js';
-import {aleatorio} from './materiales.js?v=d3fe41877940';
+import {aleatorio} from './materiales.js?v=53302cb81952';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
-import {crearManiobra} from './maniobra.js?v=d3fe41877940';
-import {crearPergola} from './pergola.js?v=d3fe41877940';
-import {plantarPinos} from './pinar.js?v=d3fe41877940';
-import {CORTE_MUELLES,FIN_LLEGADA,INICIO_PLACAS_NAVE,tiempoNave} from './guion.js?v=d3fe41877940';
+import {crearManiobra} from './maniobra.js?v=53302cb81952';
+import {crearPergola} from './pergola.js?v=53302cb81952';
+import {plantarPinos} from './pinar.js?v=53302cb81952';
+import {CORTE_MUELLES,FIN_LLEGADA,INICIO_PLACAS_NAVE,tiempoNave} from './guion.js?v=53302cb81952';
 
 const liberar = T.MathUtils.smoothstep;
 const caja = () => new T.BoxGeometry(1,1,1);

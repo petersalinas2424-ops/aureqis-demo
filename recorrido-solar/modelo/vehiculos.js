@@ -50,7 +50,9 @@ export function cargarVehiculo(padre,nombre,carga,alLlegar){
     for(const geometria of geometrias)geometria.dispose();
     modelo.removeFromParent();
   }
-  new GLTFLoader(carga).load(new URL('./'+nombre+'.glb',import.meta.url).href,({scene})=>{
+  const archivo=new URL('./'+nombre+'.glb',import.meta.url);
+  archivo.search=new URL(import.meta.url).search;
+  new GLTFLoader(carga).load(archivo.href,({scene})=>{
     if(cerrado){liberar(scene);return;}
     vehiculo=scene;
     scene.traverse(o=>{if(o.isMesh){o.castShadow=!o.material.transparent;o.receiveShadow=true;}});

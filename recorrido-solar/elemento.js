@@ -1,4 +1,4 @@
-import {iniciarPortada} from './montaje.js?v=d3fe41877940';
+import {iniciarPortada} from './montaje.js?v=53302cb81952';
 
 class PortadaAureqis extends HTMLElement {
   connectedCallback() {

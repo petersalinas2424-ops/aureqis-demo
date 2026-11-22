@@ -1,9 +1,9 @@
-import {lineaCosta} from './orilla.js?v=d3fe41877940';
+import {lineaCosta} from './orilla.js?v=53302cb81952';
 import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
-import {aleatorio} from './materiales.js?v=d3fe41877940';
-import {crearVilla} from './villa.js?v=d3fe41877940';
-import {plantarPinos} from './pinar.js?v=d3fe41877940';
+import {aleatorio} from './materiales.js?v=53302cb81952';
+import {crearVilla} from './villa.js?v=53302cb81952';
+import {plantarPinos} from './pinar.js?v=53302cb81952';
 
 let AZAR;
 const EJE_Y=new T.Vector3(0,1,0);
@@ -245,17 +245,43 @@ function acumulador(padre,m) {
 
 function olivar(padre,m) {
   const segmentos=[], hojas=[], pen=new T.Object3D();
+  const troncos=[], indicesTronco=[], uvTronco=[];
+  function troncoContinuo(base,pie,cruz,escala){
+    const anillos=10,lados=14,primero=troncos.length/3;
+    const eje=new T.CatmullRomCurve3([base,pie,cruz]);
+    for(let j=0;j<=anillos;j++){
+      const t=j/anillos, centro=eje.getPoint(t);
+      const radio=escala*(.12+.06*(1-t)+.105*Math.exp(-7*t));
+      for(let k=0;k<=lados;k++){
+        const a=k/lados*Math.PI*2,r=radio*(1+.08*Math.sin(5*a+t));
+        troncos.push(centro.x+r*Math.cos(a),centro.y,centro.z+r*Math.sin(a));
+        uvTronco.push(k/lados,t);
+        if(j<anillos&&k<lados){
+          const i=primero+j*(lados+1)+k;
+          indicesTronco.push(i,i+lados+1,i+1,i+1,i+lados+1,i+lados+2);
+        }
+      }
+    }
+    const cima=troncos.length/3,ultimo=primero+anillos*(lados+1);
+    troncos.push(cruz.x,cruz.y+.07*escala,cruz.z);uvTronco.push(.5,1);
+    for(let k=0;k<lados;k++)indicesTronco.push(ultimo+k,cima,ultimo+k+1);
+  }
   const agregarRama=(a,b,r)=>{
     const v=b.clone().sub(a);
     pen.position.copy(a).addScaledVector(v,.5);pen.quaternion.setFromUnitVectors(EJE_Y,v.clone().normalize());
     pen.scale.set(r,v.length(),r);pen.updateMatrix();segmentos.push(pen.matrix.clone());
   };
   const arbol=(x,z,s)=>{
-    const base=new T.Vector3(x,.01,z);
+    const base=new T.Vector3(x,-.25,z);
     const giro=AZAR()*Math.PI*2;
     const pie=base.clone().add(new T.Vector3(-Math.sin(giro)*s*.12,.46*s,Math.cos(giro)*s*.12));
     const arranque=pie.clone().add(new T.Vector3(Math.cos(giro)*s*.23,.54*s,Math.sin(giro)*s*.23));
-    agregarRama(base,pie,.195*s);agregarRama(pie,arranque,.15*s);
+    for(let raiz=0;raiz<5;raiz++){
+      const a=giro+raiz*Math.PI*2/5;
+      const punta=new T.Vector3(x+Math.cos(a)*s*.37,-.24,z+Math.sin(a)*s*.37);
+      agregarRama(punta,base.clone().addScaledVector(EJE_Y,.28*s),.082*s);
+    }
+    troncoContinuo(base,pie,arranque,s);
     for(let i=0;i<7;i++){
       const ang=i*.898+AZAR()*.4, rad=(.55+AZAR()*.51)*s;
       const bif=arranque.clone().add(new T.Vector3(Math.cos(ang)*rad,.55*s+AZAR()*.3*s,Math.sin(ang)*rad));
@@ -275,10 +301,16 @@ function olivar(padre,m) {
   for(const [x,z,s] of [[-10.58,3.5,1.52],[13.1,-6.4,1.68],[-16.5,9.1,1.05],[-14,-14,1.70],[-20,-2,1.60],[1,-16,1.43],[11.5,-21,1.68],[-25,17,1.35]]) arbol(x,z,s);
   function instanciar(g,mat,formas){
     const obj=new T.InstancedMesh(g,mat,formas.length);
+    obj.userData.paisajismo=true;
     formas.forEach((matrix,index)=>obj.setMatrixAt(index,matrix));
     obj.castShadow=true;obj.receiveShadow=true;padre.add(obj);
   }
-  instanciar(new T.CylinderGeometry(.73,1,1,7),m.corteza,segmentos);
+  const corteza=new T.BufferGeometry();
+  corteza.setAttribute('position',new T.Float32BufferAttribute(troncos,3));
+  corteza.setAttribute('uv',new T.Float32BufferAttribute(uvTronco,2));
+  corteza.setIndex(indicesTronco);corteza.computeVertexNormals();
+  const troncosOlivo=malla(padre,corteza,m.corteza);troncosOlivo.userData.paisajismo=true;
+  instanciar(new T.CylinderGeometry(.73,1,1,9),m.corteza,segmentos);
   instanciar(new T.PlaneGeometry(1,1),m.hojas,hojas);
 }
 

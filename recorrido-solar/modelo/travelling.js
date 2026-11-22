@@ -1,5 +1,5 @@
 import { MathUtils, Vector3 } from './vendor/three.module.min.js';
-import {tiempoVilla} from './guion.js?v=d3fe41877940';
+import {tiempoVilla} from './guion.js?v=53302cb81952';
 
 // Un solo movimiento de cámara rodea la piscina, sube a la cubierta y sigue la
 // instalación por el costado este. El último alejamiento vuelve al jardín.
@@ -80,12 +80,13 @@ export function encuadrarResidencial(camara, recorrido) {
   focoPatio.set(14.86+.12*tramo,1.05,2.0);
   camara.position.lerp(ojoPatio,mezcla);
   camara.lookAt(punto.lerp(focoPatio,mezcla));
-  const apertura=Math.max(1,Math.min(3,1.04/camara.aspect));
+  const vertical=1-MathUtils.smoothstep(camara.aspect,.66,1.04);
+  const apertura=Math.max(1,Math.min(3.6,(1.04+.17*vertical)/camara.aspect));
   const optica=MathUtils.radToDeg(2*Math.atan(Math.tan(MathUtils.degToRad(34)/2)*apertura));
   const dx=camara.projectionMatrix.elements[8],dy=camara.projectionMatrix.elements[9];
   camara.fov=MathUtils.lerp(camara.fov,optica,mezcla);
   camara.updateProjectionMatrix();
-  camara.projectionMatrix.elements[8]=dx;
+  camara.projectionMatrix.elements[8]=dx+.055*vertical*mezcla;
   camara.projectionMatrix.elements[9]=dy;
   camara.projectionMatrixInverse.copy(camara.projectionMatrix).invert();
 }

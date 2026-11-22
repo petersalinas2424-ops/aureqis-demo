@@ -1,17 +1,17 @@
-import {crearEnlace} from './enlace.js?v=d3fe41877940';
-import {crearGolondrinas} from './aves.js?v=d3fe41877940';
-import {tiempoParking,FIN_RECORRIDO} from './guion.js?v=d3fe41877940';
+import {crearEnlace} from './enlace.js?v=53302cb81952';
+import {crearGolondrinas} from './aves.js?v=53302cb81952';
+import {tiempoParking,FIN_RECORRIDO} from './guion.js?v=53302cb81952';
 import * as T from './vendor/three.module.min.js';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {HDRLoader} from './vendor/HDRLoader.js';
-import {crearMateriales} from './materiales.js?v=d3fe41877940';
-import {construirInstalacion} from './instalacion.js?v=d3fe41877940';
-import {encuadrarDron} from './dron.js?v=d3fe41877940';
-import {encuadrarResidencial} from './travelling.js?v=d3fe41877940';
-import {tiempoVilla,tiempoNave,tiempoDron,progresoResidencial,INICIO_EMPRESAS,DESPEGUE,FIN_ENLACE,CORTE_MUELLES,SEGUNDOS_MANIOBRA} from './guion.js?v=d3fe41877940';
-import {crearRecarga} from './recarga.js?v=d3fe41877940';
-import {crearAmbiente} from './ambiente.js?v=d3fe41877940';
-import {registrarAcabados} from './acabado.js?v=d3fe41877940';
+import {crearMateriales} from './materiales.js?v=53302cb81952';
+import {construirInstalacion} from './instalacion.js?v=53302cb81952';
+import {encuadrarDron} from './dron.js?v=53302cb81952';
+import {encuadrarResidencial} from './travelling.js?v=53302cb81952';
+import {tiempoVilla,tiempoNave,tiempoDron,progresoResidencial,INICIO_EMPRESAS,DESPEGUE,FIN_ENLACE,CORTE_MUELLES,SEGUNDOS_MANIOBRA} from './guion.js?v=53302cb81952';
+import {crearRecarga} from './recarga.js?v=53302cb81952';
+import {crearAmbiente} from './ambiente.js?v=53302cb81952';
+import {registrarAcabados} from './acabado.js?v=53302cb81952';
 
 const VISTAS={
   salon:{ojo:[2.8,1.66,2.29],foco:[-3.7,1.18,-.90]},
@@ -148,7 +148,7 @@ export function montarVisor(contenedor,{guiado=false,onCambio,onListo,onError}={
     despertar();
   }
   function prepararNave() {
-    if (!preparandoNave) preparandoNave=import('./nave.js?v=d3fe41877940').then(({crearNave})=>{
+    if (!preparandoNave) preparandoNave=import('./nave.js?v=53302cb81952').then(({crearNave})=>{
       if(cerrado)return;
       nave=crearNave(render,entorno,despertar);
       despertar();

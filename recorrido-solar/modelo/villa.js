@@ -1,8 +1,8 @@
 import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 import {Reflector} from './vendor/Reflector.js';
-import {aleatorio} from './materiales.js?v=d3fe41877940';
-import {vestirVilla} from './detalles.js?v=d3fe41877940';
+import {aleatorio} from './materiales.js?v=53302cb81952';
+import {vestirVilla} from './detalles.js?v=53302cb81952';
 
 const bloque = new T.BoxGeometry(1,1,1);
 const tabla = new T.CylinderGeometry(1,1,1,36);
@@ -45,7 +45,7 @@ function taller(padre) {
   return {pieza,acabar};
 }
 
-function crearTravertino() {
+export function crearTravertino() {
   const lienzo=document.createElement('canvas');lienzo.width=768;lienzo.height=384;
   const ctx=lienzo.getContext('2d'), datos=ctx.createImageData(768,384), rng=aleatorio(7125);
   const veta=new Float32Array(384);
@@ -441,7 +441,7 @@ export function crearVilla(padre,m) {
   const muestras=[[-12.5,1,1.12],[-11.34,2.3,.70],[-11.2,6.22,.78],[-12.25,7.21,1.16],[-11.67,9.35,.78],
     [-11.45,11.36,1.10],[-9.74,12.27,.9],[-8.21,12.05,.75],[-5.51,11.46,.64],[-3.56,11.20,.48],
     [5.08,11.11,.59],[7.19,11.72,.77],[9.47,12.10,.81],[11.22,10.70,1.20],[10.92,8.46,.77],
-    [12.20,7.31,.96],[12.78,6.81,.55],[11.21,2.16,.88],[10.93,.9,.57],[10.72,-2.40,1.05]];
+    [12.20,7.31,.96],[12.78,6.81,.55],[10.69,2.16,.72],[10.93,.9,.57],[10.72,-2.40,1.05]];
   for(let i=0;i<muestras.length;i++){
     const [x,z,r]=muestras[i];const mat=[mata1,mata2,mata3][i%3];
     for(let b=0;b<33;b++){
@@ -470,7 +470,7 @@ export function crearVilla(padre,m) {
       }
     }
   }
-  for(const [x,z] of [[-12.2,7.65],[-9.9,12.56],[-4.54,11.62],[6.3,11.95],[10.87,9.5],[11.54,2.36]]){
+  for(const [x,z] of [[-12.2,7.65],[-9.9,12.56],[-4.54,11.62],[6.3,11.95],[10.87,9.5],[10.36,3.50]]){
     cubo(metal,x,.26,z,.065,.52,.065);cubo(lampara,x,.489,z,.073,.044,.073);
     pieza(halo,lavado,x,.022,z+.11,1.26,1.51,1,-Math.PI/2);
   }

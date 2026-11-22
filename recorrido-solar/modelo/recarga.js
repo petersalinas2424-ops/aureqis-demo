@@ -1,5 +1,6 @@
-import {encuadrarResidencial} from './travelling.js?v=d3fe41877940';
-import {cargarVehiculo,proyectarAcabado} from './vehiculos.js?v=d3fe41877940';
+import {crearTravertino} from './villa.js?v=53302cb81952';
+import {encuadrarResidencial} from './travelling.js?v=53302cb81952';
+import {cargarVehiculo,proyectarAcabado} from './vehiculos.js?v=53302cb81952';
 import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 
@@ -116,6 +117,7 @@ export function crearRecarga(padre,carga,repintar) {
     const s=malla(new T.PlaneGeometry(a,f),caucho,x,.008,z);s.rotation.x=-Math.PI/2;
   }
   sombra(0,0,5.18,2.29);
+  for(const eje of [-1.558,1.397])for(const lado of [-.82,.80])sombra(eje,lado,.48,.32);
   const puertox=1.96, puertoy=.91, puertoz=.786;
   caja(negro,puertox,puertoy,puertoz,.196,.158,.047,.029);
   const tapa=caja(pintura,puertox-.116,puertoy+.035,puertoz+.046,.124,.154,.018,.016);tapa.rotation.y=-.85;
@@ -129,13 +131,9 @@ export function crearRecarga(padre,carga,repintar) {
     return V(2.975+u*15.745,-.004-.344*T.MathUtils.smoothstep(u,.08,.68),
       -1.42*curvatura+(v-.5)*(3.17+.27*curvatura));
   };
-  const pavimento=adoquines();
-  function pavimentar(geometria){
-    const uv=geometria.attributes.uv, pos=geometria.attributes.position;
-    for(let i=0;i<uv.count;i++)uv.setXY(i,pos.getX(i)/2.40,pos.getZ(i)/2.40);
-    malla(geometria,pavimento);
-  }
-  pavimentar(superficie(28,3,entrada,true));
+  const acceso=adoquines();
+  acceso.map.repeat.set(14,2.6);
+  malla(superficie(28,3,entrada,true),acceso);
   for(const orilla of [0,1]){
     const puntos=Array.from({length:23},(_,i)=>entrada(i/22,orilla));
     const perfilBorde=superficie(22,1,(u,v)=>{
@@ -146,18 +144,19 @@ export function crearRecarga(padre,carga,repintar) {
     malla(perfilBorde,losa);
     tubo(losa,puntos,.022,28);
   }
-  // Baldosas a escala de la plaza. El mismo aparejo continúa bajo el pedestal.
-  function solera(x,z,ancho,fondo){
-    caja(losa,x,-.234,z,ancho,.46,fondo,.008);
-    const tapa=superficie(1,1,(u,v)=>V(x+(u-.5)*ancho,-.003,z+(v-.5)*fondo),true);
-    pavimentar(tapa);
+  // La plaza conserva la huella y la piedra de la terraza. Las juntas
+  // estrechas entre las piezas permiten leer el despiece al ras del suelo.
+  const piedra=acabado('#fff4df',0,.80);piedra.map=crearTravertino();
+  caja(losa,0,-.084,0,5.95,.15,3.17,.008);
+  const filas=3, columnas=4, ancho=5.95/columnas, fondo=3.17/filas;
+  for(let fila=0;fila<filas;fila++)for(let col=0;col<columnas;col++){
+    const x=-2.975+(col+.5)*ancho,z=-1.585+(fila+.5)*fondo;
+    caja(piedra,x,-.023,z,ancho-.006,.04,fondo-.006,.0025);
   }
-  solera(0,0,5.95,3.17);
-  // El acceso discurre por +X. El pedestal tiene su propia solera en el
-  // margen de la plaza, por fuera del ancho libre del camino y de las puertas.
-  const poste=V(1.27,0,2.19);
-  solera(poste.x,2.075,1.25,.98);
-  const frente=V(.96,0,.29).normalize(), giro=Math.atan2(frente.x,frente.z);
+  // El cargador queda tras la esquina posterior opuesta, fuera del paso.
+  const poste=V(2.83,0,-1.99);
+  caja(losa,poste.x,-.10,poste.z,.44,.194,.42,.013);
+  const frente=V(.32,0,.95).normalize(), giro=Math.atan2(frente.x,frente.z);
   const sobre=(alto,espesor)=>V(poste.x+frente.x*espesor,alto,poste.z+frente.z*espesor);
   caja(negro,poste.x,.014,poste.z,.37,.036,.33,.012);
   caja(satinado,poste.x,.537,poste.z,.124,1.04,.105,.014);
@@ -178,17 +177,27 @@ export function crearRecarga(padre,carga,repintar) {
   tubo(negro,[origen,origen.clone().add(V(.004,-.097,.018))],.037,8);
   const cuello=V(puertox+.05,puertoy-.113,puertoz+.193);
   tubo(cable,[origen.clone().add(V(.004,-.081,.018)),
-    [1.42,.60,2.19],[1.51,.29,2.08],[1.66,.19,1.82],
-    [1.86,.27,1.53],[2.01,.54,1.23],cuello],.018,48);
+    [2.90,.37,-1.72],[2.96,.072,-1.39],[2.93,.038,-.66],
+    [2.78,.033,.22],[2.55,.072,.90],[2.30,.16,1.15],[2.09,.44,1.16],cuello],.018,64);
   // Un aplique local ilumina la zona de conexión sin simular faros de marcha.
   const aplique=new T.PointLight('#e2eaf2',0,6.5,2);aplique.position.set(15.65,2.85,2.21);padre.add(aplique);
+  const luzJardin=new T.PointLight('#ffd6a4',0,6.4,2);
+  luzJardin.position.set(14.12,.65,-5.71);padre.add(luzJardin);
   ensamblar(grupo);
   const referencia=new T.TextureLoader(carga).load(new URL('./texturas/berlina-en-carga.webp',import.meta.url).href,repintar);
   let tono,ultimaNoche=0;
   const retirarCoche=cargarVehiculo(grupo,'berlina-electrica',carga,modelo=>{
     modelo.rotation.y=-Math.PI/2;
     const materiales=new Set();
-    modelo.traverse(o=>{if(o.material?.isMeshStandardMaterial)materiales.add(o.material);});
+    modelo.traverse(o=>{
+      const mat=o.material;
+      if(!mat?.isMeshStandardMaterial)return;
+      if(/^(wheel|cal)/i.test(o.name)){
+        if(mat.name==='Material.012'){
+          mat.color.set('#b5b9bc');mat.metalness=.63;mat.roughness=.33;
+        }
+      }else materiales.add(mat);
+    });
     const camara=new T.PerspectiveCamera(34,1.6,.065,170);
     encuadrarResidencial(camara,.555/.82);
     tono=proyectarAcabado(materiales,referencia,camara);
@@ -198,6 +207,7 @@ export function crearRecarga(padre,carga,repintar) {
   function actualizar(noche,progreso){
     ultimaNoche=noche;if(tono)tono.value=.08+.90*noche;
     aplique.intensity=7.8*noche;
+    luzJardin.intensity=4.6*noche;
     verde.emissiveIntensity=.63+.68*noche+.13*Math.sin(progreso*24);
   };
   actualizar.destruir=()=>{retirarCoche();referencia.dispose();};
