@@ -1,4 +1,4 @@
-import {tiempoVilla, progresoResidencial, FIN_LLEGADA, INICIO_PLACAS_NAVE, faseCubierta, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js?v=4123164f6cc5';
+import {tiempoVilla, progresoResidencial, FIN_LLEGADA, INICIO_PLACAS_NAVE, faseCubierta, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js?v=fafacc8c4dac';
 const revision = new URL(import.meta.url).search;
 const recurso = ruta => new URL(ruta, import.meta.url).href + revision;
 
@@ -43,7 +43,7 @@ export function iniciarPortada(raiz) {
   };
   let promesaModulo;
   function cargarModulo() {
-    if (!promesaModulo) promesaModulo = import('./modelo/visor.js?v=4123164f6cc5').catch(error => { promesaModulo = null; throw error; });
+    if (!promesaModulo) promesaModulo = import('./modelo/visor.js?v=fafacc8c4dac').catch(error => { promesaModulo = null; throw error; });
     return promesaModulo;
   }
   const etapas = [

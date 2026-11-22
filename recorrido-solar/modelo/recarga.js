@@ -1,5 +1,5 @@
-import {encuadrarResidencial} from './travelling.js?v=4123164f6cc5';
-import {cargarVehiculo,proyectarAcabado} from './vehiculos.js?v=4123164f6cc5';
+import {encuadrarResidencial} from './travelling.js?v=fafacc8c4dac';
+import {cargarVehiculo,proyectarAcabado} from './vehiculos.js?v=fafacc8c4dac';
 import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 
@@ -89,7 +89,7 @@ function adoquines(){
   for(let i=0;i<datos.data.length;i+=4){const ruido=(azar()-.5)*10;for(let j=0;j<3;j++)datos.data[i+j]+=ruido;}
   g.putImageData(datos,0,0);
   const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;tex.wrapS=tex.wrapT=T.RepeatWrapping;
-  tex.repeat.set(14,2.6);tex.anisotropy=4;
+  tex.anisotropy=4;
   return new T.MeshStandardMaterial({color:'#e1ddd2',map:tex,roughness:.94,side:T.DoubleSide});
 }
 
@@ -126,10 +126,16 @@ export function crearRecarga(padre,carga,repintar) {
   losa.side=T.DoubleSide;
   const entrada=(u,v)=>{
     const curvatura=T.MathUtils.smoothstep(u,.18,.96);
-    return V(2.22+u*16.5,-.005-.344*T.MathUtils.smoothstep(u,.08,.68),
-      -.02-1.4*curvatura+(v-.5)*(3.13+.31*curvatura));
+    return V(2.975+u*15.745,-.004-.344*T.MathUtils.smoothstep(u,.08,.68),
+      -1.42*curvatura+(v-.5)*(3.17+.27*curvatura));
   };
-  malla(superficie(28,3,entrada,true),adoquines());
+  const pavimento=adoquines();
+  function pavimentar(geometria){
+    const uv=geometria.attributes.uv, pos=geometria.attributes.position;
+    for(let i=0;i<uv.count;i++)uv.setXY(i,pos.getX(i)/2.40,pos.getZ(i)/2.40);
+    malla(geometria,pavimento);
+  }
+  pavimentar(superficie(28,3,entrada,true));
   for(const orilla of [0,1]){
     const puntos=Array.from({length:23},(_,i)=>entrada(i/22,orilla));
     const perfilBorde=superficie(22,1,(u,v)=>{
@@ -140,12 +146,25 @@ export function crearRecarga(padre,carga,repintar) {
     malla(perfilBorde,losa);
     tubo(losa,puntos,.022,28);
   }
-  caja(losa,0,-.041,0,5.95,.074,3.17,.04);
-  const basePlaza=caja(negro,2.70,-.014,-.39,.63,.064,.51,.035);
-  caja(satinado,basePlaza.position.x,.035,-.39,.46,.07,.35,.032);
-  caja(satinado,2.70,.551,-.39,.156,1.09,.146,.033);
-  const frente=V(.34,0,.94).normalize(), giro=Math.atan2(frente.x,frente.z);
-  const sobre=(alto,espesor)=>V(2.70+frente.x*espesor,alto,-.39+frente.z*espesor);
+  // Baldosas a escala de la plaza. El mismo aparejo continúa bajo el pedestal.
+  function solera(x,z,ancho,fondo){
+    caja(losa,x,-.234,z,ancho,.46,fondo,.008);
+    const tapa=superficie(1,1,(u,v)=>V(x+(u-.5)*ancho,-.003,z+(v-.5)*fondo),true);
+    pavimentar(tapa);
+  }
+  solera(0,0,5.95,3.17);
+  // El acceso discurre por +X. El pedestal tiene su propia solera en el
+  // margen de la plaza, por fuera del ancho libre del camino y de las puertas.
+  const poste=V(1.27,0,2.19);
+  solera(poste.x,2.075,1.25,.98);
+  const frente=V(.96,0,.29).normalize(), giro=Math.atan2(frente.x,frente.z);
+  const sobre=(alto,espesor)=>V(poste.x+frente.x*espesor,alto,poste.z+frente.z*espesor);
+  caja(negro,poste.x,.014,poste.z,.37,.036,.33,.012);
+  caja(satinado,poste.x,.537,poste.z,.124,1.04,.105,.014);
+  const perno=new T.CylinderGeometry(.018,.018,.012,6);
+  for(const dx of [-.14,.14])for(const dz of [-.119,.119]){
+    malla(perno,satinado,poste.x+dx,.037,poste.z+dz);
+  }
   function cajaFrente(mat,alto,espesor,w,h,d,r){
     const c=sobre(alto,espesor);const m=caja(mat,c.x,c.y,c.z,w,h,d,r);m.rotation.y=giro;return m;
   }
@@ -157,7 +176,10 @@ export function crearRecarga(padre,carga,repintar) {
   cajaFrente(verde,1.121,.127,.19,.013,.008,.005);
   const origen=sobre(.981,.063);
   tubo(negro,[origen,origen.clone().add(V(.004,-.097,.018))],.037,8);
-  tubo(cable,[origen.clone().add(V(.004,-.081,.018)),[2.814,.48,-.17],[2.85,.129,.14],[2.70,.072,.73],[2.40,.062,1.13],[2.20,.15,1.27],[2.04,.40,1.21],[2.00,.66,1.08],[puertox+.05,puertoy-.113,puertoz+.193]],.0205,72);
+  const cuello=V(puertox+.05,puertoy-.113,puertoz+.193);
+  tubo(cable,[origen.clone().add(V(.004,-.081,.018)),
+    [1.42,.60,2.19],[1.51,.29,2.08],[1.66,.19,1.82],
+    [1.86,.27,1.53],[2.01,.54,1.23],cuello],.018,48);
   // Un aplique local ilumina la zona de conexión sin simular faros de marcha.
   const aplique=new T.PointLight('#e2eaf2',0,6.5,2);aplique.position.set(15.65,2.85,2.21);padre.add(aplique);
   ensamblar(grupo);
@@ -166,7 +188,7 @@ export function crearRecarga(padre,carga,repintar) {
   const retirarCoche=cargarVehiculo(grupo,'berlina-electrica',carga,modelo=>{
     modelo.rotation.y=-Math.PI/2;
     const materiales=new Set();
-    grupo.traverse(o=>{if(o.material?.isMeshStandardMaterial)materiales.add(o.material);});
+    modelo.traverse(o=>{if(o.material?.isMeshStandardMaterial)materiales.add(o.material);});
     const camara=new T.PerspectiveCamera(34,1.6,.065,170);
     encuadrarResidencial(camara,.555/.82);
     tono=proyectarAcabado(materiales,referencia,camara);

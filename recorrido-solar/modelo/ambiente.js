@@ -1,4 +1,4 @@
-import {crearMar,coordenadasBahia} from './orilla.js?v=4123164f6cc5';
+import {crearMar,coordenadasBahia} from './orilla.js?v=fafacc8c4dac';
 import * as T from './vendor/three.module.min.js';
 
 // Luz directa, relleno, exposición y cielo avanzan en tiempo solar junto al montaje.

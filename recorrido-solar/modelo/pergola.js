@@ -1,5 +1,5 @@
 import * as T from './vendor/three.module.min.js';
-import {cargarVehiculo} from './vehiculos.js?v=4123164f6cc5';
+import {cargarVehiculo} from './vehiculos.js?v=fafacc8c4dac';
 
 // Seis plazas frente a las oficinas. Los apoyos quedan al fondo y dejan libre
 // el frente de las plazas para entrar, salir y abrir las puertas.

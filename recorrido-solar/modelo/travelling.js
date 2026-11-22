@@ -1,5 +1,5 @@
 import { MathUtils, Vector3 } from './vendor/three.module.min.js';
-import {tiempoVilla} from './guion.js?v=4123164f6cc5';
+import {tiempoVilla} from './guion.js?v=fafacc8c4dac';
 
 // Un solo movimiento de cámara rodea la piscina, sube a la cubierta y sigue la
 // instalación por el costado este. El último alejamiento vuelve al jardín.

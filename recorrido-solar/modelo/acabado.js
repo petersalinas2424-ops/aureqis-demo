@@ -1,7 +1,7 @@
 import * as T from './vendor/three.module.min.js';
-import {encuadrarViaje,encuadrarResidencial} from './travelling.js?v=4123164f6cc5';
-import {encuadrarDron} from './dron.js?v=4123164f6cc5';
-import {tiempoDron} from './guion.js?v=4123164f6cc5';
+import {encuadrarViaje,encuadrarResidencial} from './travelling.js?v=fafacc8c4dac';
+import {encuadrarDron} from './dron.js?v=fafacc8c4dac';
+import {tiempoDron} from './guion.js?v=fafacc8c4dac';
 
 // Cada toma registra la misma geometría desde una cámara conocida, en un momento del día.
 const registros = [['dia', 0], ['tejado', .34], ['pared', .705], ['noche', 1], ['patio', .677], ['costa', .803]];
@@ -15,14 +15,21 @@ const fragmentos = `
   varying vec4 clipA,clipB; varying vec3 lugarVilla;
   // El vehículo se dibuja en 3D. Evita proyectar su antigua silueta sobre la
   // fachada o el camino que quedan detrás en una fotografía de referencia.
-  float fondoSinCoche(vec3 ojo){
+  float fondoLibre(vec3 ojo, vec3 inferior, vec3 superior){
     vec3 r=lugarVilla-ojo;
     vec3 inv=vec3(1.)/(r+vec3(.00001));
-    vec3 a=(vec3(11.68,.025,.75)-ojo)*inv,b=(vec3(16.58,1.40,2.98)-ojo)*inv;
+    vec3 a=(inferior-ojo)*inv,b=(superior-ojo)*inv;
     vec3 cerca=min(a,b),lejos=max(a,b);
     float entrada=max(max(cerca.x,cerca.y),max(cerca.z,0.));
     float salida=min(min(lejos.x,lejos.y),min(lejos.z,1.));
     return 1.-smoothstep(0.,.20,(salida-entrada)*length(r));
+  }
+  float fondoSinEquipo(vec3 ojo){
+    float coche=fondoLibre(ojo,vec3(11.68,.025,.75),vec3(16.58,1.40,2.98));
+    // El fondo fotográfico conserva el poste de la distribución anterior.
+    float pantalla=fondoLibre(ojo,vec3(16.50,.93,1.26),vec3(17.12,1.77,1.74));
+    float pie=fondoLibre(ojo,vec3(16.46,-.08,1.15),vec3(17.18,1.08,1.79));
+    return coche*pantalla*pie;
   }
   vec4 detalleVilla(sampler2D foto,sampler2D distancia,vec4 clip) {
     vec3 ndc=clip.xyz/max(.001,clip.w);
@@ -40,7 +47,7 @@ const aplicar = `
   if(intensidades.x+intensidades.y>.005){
     vec4 da=detalleVilla(colorA,fondoA,clipA);
     vec4 db=detalleVilla(colorB,fondoB,clipB);
-    vec2 pesos=vec2(da.a*fondoSinCoche(ojoA),db.a*fondoSinCoche(ojoB))*intensidades;
+    vec2 pesos=vec2(da.a*fondoSinEquipo(ojoA),db.a*fondoSinEquipo(ojoB))*intensidades;
     // En la pared de equipos la iluminación física conserva una sola sombra al rodear el patio.
     float pared=smoothstep(7.86,7.99,lugarVilla.x)*(1.-smoothstep(8.30,8.55,lugarVilla.x));
     float bajoAlero=1.-smoothstep(2.87,3.36,lugarVilla.y);
