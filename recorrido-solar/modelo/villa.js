@@ -1,8 +1,8 @@
 import * as T from './vendor/three.module.min.js';
 import {RoundedBoxGeometry} from './vendor/RoundedBoxGeometry.js';
 import {Reflector} from './vendor/Reflector.js';
-import {aleatorio} from './materiales.js?v=fafacc8c4dac';
-import {vestirVilla} from './detalles.js?v=fafacc8c4dac';
+import {aleatorio} from './materiales.js?v=d3fe41877940';
+import {vestirVilla} from './detalles.js?v=d3fe41877940';
 
 const bloque = new T.BoxGeometry(1,1,1);
 const tabla = new T.CylinderGeometry(1,1,1,36);

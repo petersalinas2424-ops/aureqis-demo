@@ -1,4 +1,4 @@
-import {tiempoVilla, progresoResidencial, FIN_LLEGADA, INICIO_PLACAS_NAVE, faseCubierta, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js?v=fafacc8c4dac';
+import {tiempoVilla, progresoResidencial, FIN_LLEGADA, INICIO_PLACAS_NAVE, faseCubierta, INICIO_PARKING, DURACION_PARKING, FIN_RECORRIDO, tiempoParking} from './modelo/guion.js?v=d3fe41877940';
 const revision = new URL(import.meta.url).search;
 const recurso = ruta => new URL(ruta, import.meta.url).href + revision;
 
@@ -43,7 +43,7 @@ export function iniciarPortada(raiz) {
   };
   let promesaModulo;
   function cargarModulo() {
-    if (!promesaModulo) promesaModulo = import('./modelo/visor.js?v=fafacc8c4dac').catch(error => { promesaModulo = null; throw error; });
+    if (!promesaModulo) promesaModulo = import('./modelo/visor.js?v=d3fe41877940').catch(error => { promesaModulo = null; throw error; });
     return promesaModulo;
   }
   const etapas = [
@@ -52,7 +52,7 @@ export function iniciarPortada(raiz) {
     {inicio:.144, punto:.273, nombre:'Las placas solares', titulo:['Electricidad','en tu tejado.'], texto:'Con luz de día, las células de los paneles producen corriente continua. El cableado la lleva hasta el inversor.'},
     {inicio:.298, punto:.375, nombre:'El inversor', titulo:['Del tejado','al enchufe.'], subrayado:'al enchufe', texto:'El inversor convierte esa corriente en la que utilizan la nevera, el horno o el aire acondicionado.'},
     {inicio:.383, punto:.476, nombre:'La batería', titulo:['Energía para','después.'], texto:'Cuando las placas producen más de lo que la casa necesita, la batería puede guardar el excedente.'},
-    {inicio:.487, punto:.555, nombre:'El punto de recarga', titulo:['El coche carga','en casa.'], texto:'Desde el punto de recarga del patio puedes programar la carga para las horas en que el coche está aparcado y hay sol.'},
+    {inicio:.487, punto:.555, nombre:'El punto de recarga', titulo:['El coche carga','en casa.'], texto:'Al aparcar, conectas el coche y eliges a qué hora cargarlo. Si está en casa durante el día, puedes aprovechar la energía de tus placas.'},
     {inicio:.609, punto:.650, nombre:'La villa de noche', titulo:['La casa,','de noche.'], texto:'La batería puede alimentar las luces del salón y la terraza con la energía que se guardó durante el día.'},
     {inicio:.678, punto:.798, nombre:'La costa', titulo:['Al otro lado,','el mar.'], texto:'Desde la terraza se ven las luces de la costa. Al amanecer nos acercamos a la cubierta de una nave.'},
     {inicio:.844, punto:.8733, nombre:'La nave industrial', titulo:['Del carril','a la placa.'], subrayado:'carril', texto:'Sobre la chapa fijamos las grapas. Los dos carriles de aluminio bajan uno a uno y se apoyan en ellas.'},
